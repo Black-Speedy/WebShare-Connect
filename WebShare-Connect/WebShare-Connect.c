@@ -4,7 +4,7 @@
 #include "WebShare-Connect.h"
 
 void* server_function(void* arg){
-
+	return NULL;
 }
 
 int main(){
