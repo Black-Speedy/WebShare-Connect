@@ -3,6 +3,10 @@
 
 #include "WebShare-Connect.h"
 
+void* server_function(void* arg){
+
+}
+
 int main(){
 	printf("Hello CMake.\n");
 }

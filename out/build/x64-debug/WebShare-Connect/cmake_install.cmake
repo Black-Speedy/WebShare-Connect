@@ -1,8 +1,8 @@
-# Install script for directory: P:/WebShare-Connect/WebShare-Connect
+# Install script for directory: R:/source/WebShare-Connect/WebShare-Connect
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "P:/WebShare-Connect/out/install/x64-debug")
+  set(CMAKE_INSTALL_PREFIX "R:/source/WebShare-Connect/out/install/x64-debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 

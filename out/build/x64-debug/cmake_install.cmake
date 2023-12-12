@@ -1,8 +1,8 @@
-# Install script for directory: P:/WebShare-Connect
+# Install script for directory: R:/source/WebShare-Connect
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
-  set(CMAKE_INSTALL_PREFIX "P:/WebShare-Connect/out/install/x64-debug")
+  set(CMAKE_INSTALL_PREFIX "R:/source/WebShare-Connect/out/install/x64-debug")
 endif()
 string(REGEX REPLACE "/$" "" CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}")
 
@@ -34,7 +34,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
-  include("P:/WebShare-Connect/out/build/x64-debug/WebShare-Connect/cmake_install.cmake")
+  include("R:/source/WebShare-Connect/out/build/x64-debug/WebShare-Connect/cmake_install.cmake")
 
 endif()
 
@@ -46,5 +46,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "P:/WebShare-Connect/out/build/x64-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "R:/source/WebShare-Connect/out/build/x64-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")
