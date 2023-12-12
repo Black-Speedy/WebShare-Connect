@@ -17,12 +17,22 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Cache vcpkg installed packages
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.VCPKG_DIR }}/installed
+        key: ${{ runner.os }}-vcpkg-installed-${{ hashFiles('**/vcpkg.json') }}
+
     - name: Install vcpkg
       shell: cmd
       run: |
-        git clone https://github.com/microsoft/vcpkg.git %VCPKG_DIR%
+        git clone https://github.com/microsoft/vcpkg.git ${{ env.VCPKG_DIR }}
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg install czmq
+
+    - name: List installed packages
+      shell: cmd
+      run: .\vcpkg\vcpkg list
 
     - name: Configure CMake
       run: |
