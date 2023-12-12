@@ -1,4 +1,4 @@
-name: CMake on a single platform
+name: CMake on Windows
 
 on:
   push:
@@ -8,7 +8,7 @@ on:
 
 env:
   BUILD_TYPE: Release
-  VCPKG_DIR: ${{ github.workspace }}/vcpkg
+  VCPKG_DIR: D:\a\WebShare-Connect\WebShare-Connect\vcpkg
 
 jobs:
   build:
@@ -18,22 +18,21 @@ jobs:
     - uses: actions/checkout@v3
 
     - name: Install vcpkg
+      shell: cmd
       run: |
-        git clone https://github.com/microsoft/vcpkg.git ${{ env.VCPKG_DIR }}
-        ${{ env.VCPKG_DIR }}/bootstrap-vcpkg.sh
-        ${{ env.VCPKG_DIR }}/vcpkg install czmq
+        git clone https://github.com/microsoft/vcpkg.git %VCPKG_DIR%
+        .\vcpkg\bootstrap-vcpkg.bat
+        .\vcpkg\vcpkg install czmq
 
     - name: Configure CMake
       run: |
-        cmake -B ${{github.workspace}}/build \
-        -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-        -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_DIR }}/scripts/buildsystems/vcpkg.cmake
+        cmake -B ${{github.workspace}}\build -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_DIR }}\scripts\buildsystems\vcpkg.cmake
 
     - name: Build
       run: |
-        cmake --build ${{github.workspace}}/build --config ${{env.BUILD_TYPE}}
+        cmake --build ${{github.workspace}}\build --config ${{env.BUILD_TYPE}}
 
     - name: Test
-      working-directory: ${{github.workspace}}/build
+      working-directory: ${{github.workspace}}\build
       run: |
         ctest -C ${{env.BUILD_TYPE}}
