@@ -10,3 +10,4 @@
 #include <sys/types.h>
 #include <ws2tcpip.h>
 #include <windows.h>
+#include <czmq.h>
