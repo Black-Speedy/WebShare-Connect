@@ -17,11 +17,19 @@ jobs:
     steps:
     - uses: actions/checkout@v3
 
+    - name: Cache vcpkg installed packages
+      uses: actions/cache@v3
+      with:
+        path: ${{ env.VCPKG_DIR }}/installed
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/CMakeLists.txt') }}  # Adjust this line as needed
+
     - name: Install vcpkg
       shell: cmd
       run: |
-        git clone https://github.com/microsoft/vcpkg.git ${{ env.VCPKG_DIR }}
-        ${{ env.VCPKG_DIR }}\bootstrap-vcpkg.bat
+        if not exist "${{ env.VCPKG_DIR }}" (
+          git clone https://github.com/microsoft/vcpkg.git ${{ env.VCPKG_DIR }}
+          ${{ env.VCPKG_DIR }}\bootstrap-vcpkg.bat
+        )
 
     - name: Install czmq
       shell: cmd
