@@ -78,7 +78,7 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
 
     while (received_size < file_size) {
         size_t size;
-        if (zsock_recv(client_sock, "b", &buffer, &size, chunk_size) == -1) {
+        if (zsock_recv(client_sock, "b", &buffer, &size, file_size) == -1) { // Receive a chunk of data from the server socket and store it in the buffer variable (with a maximum size of chunk_size)
             fprintf(stderr, "Error receiving data\n");
             break;
         }

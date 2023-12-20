@@ -15,5 +15,6 @@
 #define FILE_SIZE_50GB 50 * 1000 * 1000 * 1000LL // 50 GiB
 
 zsock_t* server(void* context, const char* port, int threads);
+off_t getFileSize(const char* file_path);
 void server_send(zsock_t* serv_sock, const char* output_file_path);
 int server_main(int argc, char const* argv[]);

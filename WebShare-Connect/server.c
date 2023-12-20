@@ -4,9 +4,10 @@
 
 // This is the header for the file
 typedef struct {
-	int file_size;
+	off_t file_size; // Changed from int to off_t
 	int chunk_size;
 } file_header_t;
+
 
 zsock_t* server(void* context, const char *port, int threads)
 {
@@ -25,22 +26,36 @@ zsock_t* server(void* context, const char *port, int threads)
 	return serv_sock;
 }
 
-void server_send(zsock_t* serv_sock, const char* file_path)
-{
-	// Open file
-	FILE *fp = fopen(file_path, "rb");
-	if (fp == NULL)
-	{
-		printf("File open error\n");
+// Function to get file size using off_t
+off_t getFileSize(const char* file_path) {
+	struct stat st;
+	if (stat(file_path, &st) == 0) {
+		return st.st_size;
+	}
+	else {
+		perror("stat");
+		return -1; // Return -1 if file size retrieval fails
+	}
+}
+
+void server_send(zsock_t* serv_sock, const char* file_path) {
+    // Open file
+    FILE *fp = fopen(file_path, "rb");
+    if (fp == NULL) {
+        printf("File open error\n");
+        return;
+    }
+
+
+    // Determine file size
+	off_t file_size = getFileSize(file_path);
+	if (file_size < 0) {
+		printf("Failed to determine file size\n");
+		fclose(fp);
 		return;
 	}
 
-	// Determine file size
-	fseek(fp, 0L, SEEK_END);
-	int file_size = ftell(fp);
-	rewind(fp); 
-
-	printf("File size: %d bytes\n", file_size);
+	printf("File size: %lld bytes\n", file_size);
 
 	int chunk_size;
 
@@ -114,7 +129,7 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		zsock_send(serv_sock, "b", buffer, bytesRead); // Send file chunk
 
 		current_chunk++;
-		printf("Sent chunk %d/%d with size %d bytes\n", current_chunk, chunk_count, bytesRead);
+		printf("Sent chunk %d/%d with size %lld bytes\n", current_chunk, chunk_count, bytesRead);
 
 	}
 	free(buffer);
