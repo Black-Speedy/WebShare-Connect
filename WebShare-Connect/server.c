@@ -2,20 +2,27 @@
 #include "server.h"
 #include "sha512.h"
 
-void server(char* client_ip, char* port, int threads)
+// This is the header for the file
+typedef struct {
+	int file_size;
+	int chunk_size;
+} file_header_t;
+
+zsock_t* server(void* context, const char *port, int threads)
 {
 	int io_threads = threads;
-	void* context = zmq_ctx_new();
 	zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
 	assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
 	
-	zsock_t *serv_sock = zsock_new(ZMQ_PUSH);
+	zsock_t* serv_sock = zsock_new(ZMQ_PUSH);
 	assert(serv_sock);
 
 	int rc = zsock_bind(serv_sock, "tcp://*:%s", port);
 	assert(rc != -1);
 
-	zsock_set_rcvtimeo(serv_sock, 5000); // 5s timeout for recv
+	zsock_set_rcvtimeo(serv_sock, 2000); // 2s timeout for recv
+
+	return serv_sock;
 }
 
 void server_send(zsock_t* serv_sock, const char* file_path)
@@ -32,6 +39,8 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 	fseek(fp, 0L, SEEK_END);
 	int file_size = ftell(fp);
 	rewind(fp); 
+
+	printf("File size: %d bytes\n", file_size);
 
 	int chunk_size;
 
@@ -72,6 +81,16 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		chunk_size = 2 ^ 24;
 	}
 
+	printf("Chunk size: %d bytes\n", chunk_size);
+
+	file_header_t header;
+	header.file_size = file_size;
+	header.chunk_size = chunk_size;
+
+	// Send file header
+	zsock_send(serv_sock, "b", &header, sizeof(header));
+	printf("Sent file header\n");
+
 	// Send file size
 	char* buffer = (char*)malloc(chunk_size);
 	if (buffer == NULL)
@@ -81,6 +100,10 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		return;
 	}
 
+	int chunk_count = file_size / chunk_size + (file_size % chunk_size != 0);
+	int current_chunk = 0;
+	printf("Total chunks to send: %d\n", chunk_count);
+
 	// Send file size until end of file
 	while (!feof(fp)) {
 		size_t bytesRead = fread(buffer, 1, chunk_size, fp);
@@ -89,13 +112,46 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 			break;
 		}
 		zsock_send(serv_sock, "b", buffer, bytesRead); // Send file chunk
-	}
 
+		current_chunk++;
+		printf("Sent chunk %d/%d with size %d bytes\n", current_chunk, chunk_count, bytesRead);
+
+	}
 	free(buffer);
 	fclose(fp);
-	
-	// Send end of file
-	zstr_send(serv_sock, "EOF");
+}
+
+int server_main(int argc, char const* argv[]) {
+	if (argc < 4) 
+	{
+		printf("Usage: %s server [port] [threads] [file_path]\n", argv[-1]);
+		return 1;
+	}
+
+	const char* port = argv[1];
+	int threads = atoi(argv[2]);
+	const char* file_path = argv[3];
+
+	void* context = zmq_ctx_new();
+	assert(context);
+
+	// Create and bind the PUSH socket
+	zsock_t* serv_sock = server(context, port, threads);
+	assert(serv_sock);
+
+	// Wait for client to connect
+	// Note: In PUSH/PULL, PUSH socket can send messages even if no clients are connected,
+	// messages will be queued until clients connect.
+	// Add logic to wait for client connection if needed.
+
+	// Send the file
+	server_send(serv_sock, file_path);
+
+	// Clean up
+	zsock_destroy(&serv_sock);
+	zmq_ctx_destroy(&context);
+
+	return 0;
 }
 
 // TODO: Maybe multithread the computing of the hash and sending of the file chunks. 
