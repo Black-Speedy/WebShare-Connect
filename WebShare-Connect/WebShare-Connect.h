@@ -11,3 +11,5 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 #include <czmq.h>
+#include <OpenSSL/ssl.h>
+#include "common.h"
