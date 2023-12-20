@@ -1,20 +1,24 @@
-﻿// WebShare-Connect.cpp : Defines the entry point for the application.
-//
+﻿#include "WebShare-Connect.h"
+#include "server.h"
+#include "client.h"
 
-#include "WebShare-Connect.h"
+int main(int argc, char const* argv[])
+	{
+	/*
+	if (argc < 2) {
+		printf("Usage: %s [server|client]\n", argv[0]);
+		return 1;
+	}
 
-int main(){
-	printf("Starting server...\n");
-	zsock_t* responder = zsock_new(ZMQ_REP);
-	int r = zsock_bind(responder, "tcp://*:5555");
-	if (r != 5555) {
-		printf("did not work, idiot\n");
+	if (strcmp(argv[1], "server") == 0) {
+		return server_main(argc - 1, argv + 1);
+	} else if (strcmp(argv[1], "client") == 0) {
+		return client_main(argc - 1, argv + 1);
+	} else {
+		printf("Usage: %s [server|client]\n", argv[0]);
+		return 1;
 	}
-	while (true) {
-		char* msg = zstr_recv(responder);
-		if (strcmp(msg, "Din Far") == 0) {
-			printf("Received: %s\n", msg);
-			zstr_send(responder, "Hello");
-		}
-	}
+	*/
 }
+
+
