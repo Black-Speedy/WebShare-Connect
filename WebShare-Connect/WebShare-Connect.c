@@ -89,7 +89,7 @@ int main(int argc, char const* argv[])
             return server_main(4, user_argv + 1); // 4 is the number of arguments in user_argv
         }
         else {
-            return client_main(argc, user_argv + 1);
+            return client_main(4, user_argv + 1);
         }
     }
 
