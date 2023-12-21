@@ -47,7 +47,7 @@ int main(int argc, char const* argv[])
             else {
                 int portNum = atoi(port);
                 if (portNum < 0 || portNum > 65535) {
-                    printf("Invalid port number. Please enter a number between 0 and 65535.\n");
+                    printf("Invalid port number. Please enter a number between 0 and 65535: ");
                     error = 0;
                 }
             }
