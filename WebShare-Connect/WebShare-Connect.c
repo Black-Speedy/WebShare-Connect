@@ -30,7 +30,7 @@ int main(int argc, char const* argv[])
             error = scanf("%9s", mode);
             if (error != 1) {
                 printf("Input error. Please try again.\n");
-                scanf("%*[^\n]"); // Clear the input buffer
+                error = scanf("%*[^\n]"); // Clear the input buffer
             }
             else if (strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0) {
                 printf("Invalid mode entered. Please try again.\n");
@@ -42,7 +42,7 @@ int main(int argc, char const* argv[])
             error = scanf("%5s", port);
             if (error != 1) {
                 printf("Input error. Please try again.\n");
-                scanf("%*[^\n]"); // Clear the input buffer
+                error = scanf("%*[^\n]"); // Clear the input buffer
             }
             else {
                 int portNum = atoi(port);
@@ -54,11 +54,11 @@ int main(int argc, char const* argv[])
         } while (error != 1);
 
         do {
-            printf("Please enter the number of threads:\n");
+            printf("Please enter the number of threads: ");
             error = scanf("%3s", threads);
             if (error != 1) {
                 printf("Input error. Please try again.\n");
-                scanf("%*[^\n]"); // Clear the input buffer
+                error = scanf("%*[^\n]"); // Clear the input buffer
             }
             //else {
                 int threadNum = atoi(threads);
@@ -70,7 +70,7 @@ int main(int argc, char const* argv[])
         } while (error != 1);
 
         printf("Please enter the file path: ");
-        scanf("%255s", filePath);
+        error = scanf("%255s", filePath);
 
         user_argv[0] = strdup(argv[0]); // Program name
         user_argv[1] = strdup(mode);
