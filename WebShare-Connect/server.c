@@ -14,7 +14,7 @@ zsock_t* server(void* context, const char *port, int threads)
 	zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
 	assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
 	
-	zsock_t* serv_sock = zsock_new(ZMQ_PUSH);
+	zsock_t* serv_sock = zsock_new(ZMQ_PAIR);
 	assert(serv_sock);
 
 	int rc = zsock_bind(serv_sock, "tcp://*:%s", port);
@@ -121,7 +121,18 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 
 		current_chunk++;
 		printf("Sent chunk %d/%d with size %lld bytes\n", current_chunk, chunk_count, bytesRead);
-
+		
+		char* ack = zstr_recv(serv_sock);
+		if (!ack) {
+			fprintf(stderr, "Failed to receive acknowledgment: %s\n", zmq_strerror(errno));
+			break;
+		}
+		if (strcmp(ack, "ACK") != 0) {
+			fprintf(stderr, "Received incorrect acknowledgment\n");
+			free(ack);
+			break;
+		}
+		free(ack);
 	}
 	free(buffer);
 	fclose(fp);

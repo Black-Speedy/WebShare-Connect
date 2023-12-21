@@ -13,7 +13,7 @@ zsock_t* client(void* context, const char *port, int threads)
 	zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
 	assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
 
-	zsock_t* client_sock = zsock_new(ZMQ_PULL);
+	zsock_t* client_sock = zsock_new(ZMQ_PAIR);
 	assert(client_sock);
 
 	int rc = zsock_connect(client_sock, "tcp://127.0.0.1:%s", port); // change to to server ip when running on different machines
@@ -88,7 +88,9 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
             fprintf(stderr, "Error writing to file: expected %zu, wrote %zu\n", size, written);
             break;
         }
-
+        if (zstr_send(client_sock, "ACK") == -1) {
+            fprintf(stderr, "Error sending acknowledgment: %s\n", zmq_strerror(errno));
+        }
         received_size += size;
         current_chunk++;
         printf("Received and wrote chunk %zu bytes\n", written);
