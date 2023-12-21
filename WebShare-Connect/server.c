@@ -83,7 +83,8 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		chunk_size = CHUNK_SIZE_50GB;
 	}
 	else {
-		chunk_size = pow(2, 24);
+		// 2^24 = 16 MiB
+		chunk_size = 1 << 24;
 	}
 
 	printf("  Chunk size: %d bytes\n", chunk_size);
@@ -162,6 +163,7 @@ int server_main(int argc, char const* argv[]) {
 	const char* port = argv[1];
 	int threads = atoi(argv[2]);
 	const char* file_path = argv[3];
+	printf("Port: %s\nThreads: %d\nFile path: %s\n", port, threads, file_path);
 
 	void* context = zmq_ctx_new();
 	assert(context);
