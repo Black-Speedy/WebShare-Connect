@@ -153,6 +153,7 @@ int server_main(int argc, char const* argv[]) {
 	const char* port = argv[1];
 	int threads = atoi(argv[2]);
 	const char* file_path = argv[3];
+	printf("Port: %s\nThreads: %d\nFile path: %s\n", port, threads, file_path);
 
 	void* context = zmq_ctx_new();
 	assert(context);
