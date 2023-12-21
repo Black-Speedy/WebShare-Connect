@@ -25,34 +25,22 @@ zsock_t* server(void* context, const char *port, int threads)
 	return serv_sock;
 }
 
-// Function to get file size using stat
-long long getFileSize(const char* file_path) {
-    struct stat st;
-    if (stat(file_path, &st) == 0) {
-        return st.st_size;
-    } else {
-        perror("stat");
-        return -1; // Return -1 if file size retrieval fails
-    }
-}
+void server_send(zsock_t* serv_sock, const char* file_path)
+{
+	// Open file
+	FILE *fp = fopen(file_path, "rb");
+	if (fp == NULL)
+	{
+		printf("File open error\n");
+		return;
+	}
 
-void server_send(zsock_t* serv_sock, const char* file_path) {
-    // Open file
-    FILE *fp = fopen(file_path, "rb");
-    if (fp == NULL) {
-        printf("File open error\n");
-        return;
-    }
+	// Determine file size
+	fseek(fp, 0L, SEEK_END);
+	int file_size = ftell(fp);
+	rewind(fp); 
 
-    // Determine file size
-    long long file_size = getFileSize(file_path);
-    if (file_size < 0) {
-        printf("Failed to determine file size\n");
-        fclose(fp);
-        return;
-    }
-
-	printf("File size: %lld bytes\n", file_size);
+	printf("File size: %d bytes\n", file_size);
 
 	int chunk_size;
 
