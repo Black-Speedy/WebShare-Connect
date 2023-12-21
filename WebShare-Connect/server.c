@@ -84,7 +84,8 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		chunk_size = CHUNK_SIZE_50GB;
 	}
 	else {
-		chunk_size = 2 ^ 24;
+		// 2^24 = 16 MiB
+		chunk_size = 1 << 24;
 	}
 
 	printf("Chunk size: %d bytes\n", chunk_size);
