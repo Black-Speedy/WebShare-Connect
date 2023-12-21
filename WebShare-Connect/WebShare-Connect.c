@@ -1,6 +1,7 @@
 ﻿#include "WebShare-Connect.h"
 #include "server.h"
 #include "client.h"
+#include "removeQuotes.h"
 
 int main(int argc, char const* argv[])
 {
@@ -21,14 +22,21 @@ int main(int argc, char const* argv[])
             scanf("%3s", threads);
 
             printf("What is the file path?\n");
-            char filePath[256]; // Adjust size according to your requirements
+            char filePath[256];
             scanf("%255s", filePath);
 
             user_argv[0] = strdup(argv[0]); // Program name
             user_argv[1] = strdup(mode);
             user_argv[2] = strdup(port);
             user_argv[3] = strdup(threads);
-            user_argv[4] = strdup(filePath);
+
+            if (containsQuotes(filePath)) {
+                printf("contains quotes and removing them\n");
+                char* newFilePath = removeQuotes(filePath);
+                user_argv[4] = strdup(newFilePath);
+            }
+            else user_argv[4] = strdup(filePath);
+
             if (strcmp(mode, "server") == 0) {
 
                 return server_main(4, user_argv + 1); // 4 is the number of arguments in user_argv
