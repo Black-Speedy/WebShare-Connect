@@ -23,17 +23,6 @@ int main(int argc, char const* argv[])
             printf("What is the file path?\n");
             char filePath[256]; // Adjust size according to your requirements
             scanf("%255s", filePath);
-            //remove any " or ' from the file path
-            char* p = filePath;
-            while (*p != '\0') {
-                if (*p == '"' || *p == '\'') {
-                    memmove(p, p + 1, strlen(p));
-                }
-                else {
-				    p++;
-			    }
-			}
-
 
             user_argv[0] = strdup(argv[0]); // Program name
             user_argv[1] = strdup(mode);
