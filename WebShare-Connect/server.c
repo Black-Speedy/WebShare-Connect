@@ -39,6 +39,12 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 	fseek(fp, 0L, SEEK_END);
 	int file_size = ftell(fp);
 	rewind(fp); 
+	if (file_size < 1)
+	{
+		printf("File size error\n");
+		fclose(fp);
+		return;
+	}
 
 	printf("File size: %d bytes\n", file_size);
 
