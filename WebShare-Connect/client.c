@@ -3,7 +3,7 @@
 
 // This is the header for the file
 typedef struct {
-	int file_size;
+    int64_t file_size;
 	int chunk_size;
 } file_header_t;
 
@@ -54,9 +54,9 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
     free(header_buf); // Free the received buffer after copying
 
     printf("Received file header\n");
-    int file_size = header.file_size;
+    int64_t file_size = header.file_size;
     int chunk_size = header.chunk_size;
-    printf("Expected file size: %d bytes\n", file_size);
+    printf("Expected file size: %lld bytes\n", file_size);
     printf("Chunk size: %d bytes\n", chunk_size);
 
     char* buffer = (char*)malloc(chunk_size);
@@ -77,15 +77,15 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
     int current_chunk = 0;
 
     while (received_size < file_size) {
-        size_t size;
-        if (zsock_recv(client_sock, "b", &buffer, &size, file_size) == -1) { // Receive a chunk of data from the server socket and store it in the buffer variable (with a maximum size of chunk_size)
-            fprintf(stderr, "Error receiving data\n");
+        int size = zmq_recv(zsock_resolve(client_sock), buffer, chunk_size, 0);
+        if (size == -1) {
+            fprintf(stderr, "Error receiving data: %s\n", zmq_strerror(errno));
             break;
         }
 
         size_t written = fwrite(buffer, 1, size, fp);
         if (written < size) {
-            fprintf(stderr, "Error writing to file: expected %zu, wrote %zu\n", size, written);
+            fprintf(stderr, "Error writing to file: expected %d bytes, wrote %zu bytes\n", size, written);
             break;
         }
         if (zstr_send(client_sock, "ACK") == -1) {
@@ -93,7 +93,8 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
         }
         received_size += size;
         current_chunk++;
-        printf("Received and wrote chunk %zu bytes\n", written);
+        fflush(&buffer);
+        //printf("Received chunk %d/%d with size %zu bytes\n", current_chunk, chunk_count, size);
     }
 
     free(buffer);

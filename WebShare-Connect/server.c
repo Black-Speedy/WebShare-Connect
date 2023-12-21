@@ -4,7 +4,7 @@
 
 // This is the header for the file
 typedef struct {
-	int file_size;
+	int64_t file_size;
 	int chunk_size;
 } file_header_t;
 
@@ -37,7 +37,7 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 
 	// Determine file size
 	fseek(fp, 0L, SEEK_END);
-	int file_size = ftell(fp);
+	int64_t file_size = _ftelli64(fp);
 	rewind(fp); 
 	if (file_size < 1)
 	{
@@ -46,7 +46,7 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		return;
 	}
 
-	printf("File size: %d bytes\n", file_size);
+	printf("File size: %lld bytes\n", file_size);
 
 	int chunk_size;
 
@@ -120,7 +120,11 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		zsock_send(serv_sock, "b", buffer, bytesRead); // Send file chunk
 
 		current_chunk++;
-		printf("Sent chunk %d/%d with size %lld bytes\n", current_chunk, chunk_count, bytesRead);
+		if (current_chunk % 100 == 0)
+		{
+			printf("Sent chunk %d/%d with size %lld bytes\n", current_chunk, chunk_count, bytesRead);
+		}
+		
 		
 		char* ack = zstr_recv(serv_sock);
 		if (!ack) {
@@ -155,11 +159,6 @@ int server_main(int argc, char const* argv[]) {
 	// Create and bind the PUSH socket
 	zsock_t* serv_sock = server(context, port, threads);
 	assert(serv_sock);
-
-	// Wait for client to connect
-	// Note: In PUSH/PULL, PUSH socket can send messages even if no clients are connected,
-	// messages will be queued until clients connect.
-	// Add logic to wait for client connection if needed.
 
 	// Send the file
 	server_send(serv_sock, file_path);
