@@ -3,53 +3,94 @@
 #include "client.h"
 #include "removeQuotes.h"
 
+int userInput(int error) {
+	if (error == EOF) {
+		printf("Error reading input\n");
+		return 1;
+	}
+	else if (error < 0) {
+		printf("No input\n");
+		return 1;
+	}
+	return 0;
+}
+
 int main(int argc, char const* argv[])
 {
     //if there are no arguments then ask for them
     if (argc < 2) {
-        char* user_argv[5];
-        printf("Which one? server or client?\n");
-        char mode[10]; // mode[10] is an array of 10 characters
-        scanf("%9s", mode); // scanf("%9s", mode) reads a string of up to 9 characters from stdin and stores it in mode
-
-        if (strcmp(mode, "server") == 0 || strcmp(mode, "client") == 0) {
-            printf("Which port?\n");
-            char port[6];
-            scanf("%5s", port);
-
-            printf("How many threads?\n");
-            char threads[4];
-            scanf("%3s", threads);
-
-            printf("What is the file path?\n");
-            char filePath[256];
-            scanf("%255s", filePath);
-
-            user_argv[0] = strdup(argv[0]); // Program name
-            user_argv[1] = strdup(mode);
-            user_argv[2] = strdup(port);
-            user_argv[3] = strdup(threads);
-
-            if (containsQuotes(filePath)) {
-                printf("contains quotes and removing them\n");
-                char* newFilePath = removeQuotes(filePath);
-                user_argv[4] = strdup(newFilePath);
+        char mode[10];
+        int error;
+        char port[6];
+		char threads[4];
+        char filePath[256];
+        char* user_argv[5]; // Array of arguments to pass to server_main or client_main
+        do {
+            printf("Please enter either 'server' or 'client': ");
+            error = scanf("%9s", mode);
+            if (error != 1) {
+                printf("Input error. Please try again.\n");
+                scanf("%*[^\n]"); // Clear the input buffer
             }
-            else user_argv[4] = strdup(filePath);
+            else if (strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0) {
+                printf("Invalid mode entered. Please try again.\n");
+            }
+        } while (strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0);
 
-            if (strcmp(mode, "server") == 0) {
-
-                return server_main(4, user_argv + 1); // 4 is the number of arguments in user_argv
+        do {
+            printf("Please enter the port (0-65535): ");
+            error = scanf("%5s", port);
+            if (error != 1) {
+                printf("Input error. Please try again.\n");
+                scanf("%*[^\n]"); // Clear the input buffer
             }
             else {
-                return client_main(argc, port, threads, filePath);
+                int portNum = atoi(port);
+                if (portNum < 0 || portNum > 65535) {
+                    printf("Invalid port number. Please enter a number between 0 and 65535.\n");
+                    error = 0;
+                }
             }
+        } while (error != 1);
+
+        do {
+            printf("Please enter the number of threads:\n");
+            error = scanf("%3s", threads);
+            if (error != 1) {
+                printf("Input error. Please try again.\n");
+                scanf("%*[^\n]"); // Clear the input buffer
+            }
+            //else {
+                int threadNum = atoi(threads);
+                //if (threadNum < 1 || threadNum > MAX_THREADS) {
+                //    printf("Invalid number of threads. Please enter a number between 1 and %d.\n", MAX_THREADS);
+                //    error = 0;
+                //}
+            //}
+        } while (error != 1);
+
+        printf("Please enter the file path: ");
+        scanf("%255s", filePath);
+
+        user_argv[0] = strdup(argv[0]); // Program name
+        user_argv[1] = strdup(mode);
+        user_argv[2] = strdup(port);
+        user_argv[3] = strdup(threads);
+
+        if (containsQuotes(filePath)) {
+            printf("contains quotes and removing them\n");
+            char* newFilePath = removeQuotes(filePath);
+            user_argv[4] = strdup(newFilePath);
+        }
+        else user_argv[4] = strdup(filePath);
+
+        if (strcmp(mode, "server") == 0) {
+
+            return server_main(4, user_argv + 1); // 4 is the number of arguments in user_argv
         }
         else {
-            printf("Invalid mode entered.\n");
-            return 1;
+            return client_main(argc, user_argv + 1);
         }
-            
     }
 
     if (strcmp(argv[1], "server") == 0) {
@@ -59,7 +100,6 @@ int main(int argc, char const* argv[])
         return client_main(argc - 1, argv + 1);
     }
     else {
-        printf("---------------------\n");
         printf("Usage: %s [server|client]\n", argv[0]);
 		return 1;
     }
