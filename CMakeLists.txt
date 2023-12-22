@@ -20,6 +20,7 @@ project (WebShare-Connect C)
 # Find packages
 find_package(czmq CONFIG REQUIRED)
 find_package(ZeroMQ REQUIRED)
+find_package(OpenSSL REQUIRED)
 
 # Include sub-projects.
 add_subdirectory ("WebShare-Connect")
