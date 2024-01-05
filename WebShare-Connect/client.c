@@ -1,3 +1,8 @@
+/**
+ * @file client_main.c
+ * @brief Main client functionality.
+ */
+
 #include "WebShare-Connect.h"
 #include "client.h"
 #include "sha512.h"

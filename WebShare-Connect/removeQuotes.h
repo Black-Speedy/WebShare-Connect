@@ -1,4 +1,9 @@
 /**
+ * @file removeQuotes.h
+ * @brief Functions to handle double quotes in strings.
+ */
+
+/**
 * @brief      Checks if a string contains double quotes.
 * @param[in]  str   The string to check.
 * @return     1 if the string contains double quotes, 0 otherwise.

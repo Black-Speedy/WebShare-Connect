@@ -1,4 +1,9 @@
 /**
+* @file server.h
+* @brief Header file for the main server functionality.
+*/
+
+/**
  * @brief Chunk sizes in bytes for various file sizes.
  */
 #define CHUNK_SIZE_1MB    (1 << 12)                 /**< Chunk size for   1 MB:   4 KiB */
