@@ -2,13 +2,27 @@
 #include "server.h"
 #include "sha512.h"
 
-// This is the header for the file
+
+/**
+ * @brief Struct representing file information.
+ */
 typedef struct {
+	// This is the header for the file
 	int64_t file_size;
 	int chunk_size;
 	unsigned char hash[SHA512_DIGEST_LENGTH];
 } file_header_t;
 
+/**
+ * @brief Sets up a server socket.
+ *
+ * Initializes and binds a server socket to the specified port.
+ *
+ * @param context The ZeroMQ context.
+ * @param port The port to bind the server socket to.
+ * @param threads The number of threads to use.
+ * @return A pointer to the created server socket.
+ */
 zsock_t* server(void* context, const char *port, int threads)
 {
 	int io_threads = threads;
@@ -26,6 +40,14 @@ zsock_t* server(void* context, const char *port, int threads)
 	return serv_sock;
 }
 
+/**
+ * @brief Sends a file via the server socket.
+ *
+ * Reads the specified file, computes its hash, and sends it in chunks via the server socket.
+ *
+ * @param serv_sock The server socket to use for sending the file.
+ * @param file_path The path to the file to be sent.
+ */
 void server_send(zsock_t* serv_sock, const char* file_path)
 {
 	// Open file
@@ -153,6 +175,16 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 	fclose(fp);
 }
 
+
+/**
+ * @brief The main function for the server.
+ *
+ * Initializes the ZeroMQ context, creates a server socket, and sends a file via the socket.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv The array of command-line arguments.
+ * @return An integer representing the exit status.
+ */
 int server_main(int argc, char const* argv[]) {
 	if (argc < 4) 
 	{

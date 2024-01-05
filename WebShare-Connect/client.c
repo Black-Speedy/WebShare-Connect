@@ -2,13 +2,26 @@
 #include "client.h"
 #include "sha512.h"
 
-// This is the header for the file
+/**
+ * @brief Struct representing file information.
+ */
 typedef struct {
+    // This is the header for the file
     int64_t file_size;
     int chunk_size;
     unsigned char hash[SHA512_DIGEST_LENGTH];
 } file_header_t;
 
+/**
+ * @brief Sets up a client socket and connects to the server.
+ *
+ * Initializes and connects a client socket to the specified server port.
+ *
+ * @param context The ZeroMQ context.
+ * @param port The port of the server to connect to.
+ * @param threads The number of threads to use.
+ * @return A pointer to the created client socket.
+ */
 zsock_t* client(void* context, const char *port, int threads)
 {
 	int io_threads = threads;
@@ -18,7 +31,7 @@ zsock_t* client(void* context, const char *port, int threads)
 	zsock_t* client_sock = zsock_new(ZMQ_PAIR);
 	assert(client_sock);
 
-	int rc = zsock_connect(client_sock, "tcp://127.0.0.1:%s", port); // change to to server ip when running on different machines
+	int rc = zsock_connect(client_sock, "tcp://2.tcp.eu.ngrok.io:%s", port); // change to to server ip when running on different machines
 	assert(rc != -1);
 
 	zsock_set_rcvtimeo(client_sock, 2000); // 2s timeout for recv
@@ -26,6 +39,15 @@ zsock_t* client(void* context, const char *port, int threads)
 	return client_sock;
 }
 
+/**
+ * @brief Receives a file via the client socket.
+ *
+ * Receives the file header, then receives file chunks and writes them to the specified output file path.
+ * Computes the hash of the received file and compares it with the expected hash.
+ *
+ * @param client_sock The client socket used for receiving the file.
+ * @param output_file_path The path to save the received file.
+ */
 void client_receive(zsock_t* client_sock, const char* output_file_path) {
     printf("\n-- File Reception --\n");
 
@@ -130,7 +152,16 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
     }
 }
 
-
+/**
+ * @brief The main function for the client.
+ *
+ * Initializes the ZeroMQ context, creates a client socket, connects to the server, and receives a file via the socket.
+ * Compares the received file's hash with the expected hash for integrity verification.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv The array of command-line arguments.
+ * @return An integer representing the exit status.
+ */
 int client_main(int argc, char const* argv[]) {
 	if (argc < 4)
 	{

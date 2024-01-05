@@ -1,20 +1,26 @@
-﻿#include "WebShare-Connect.h"
+﻿/**
+ * @file WebShare-Connect.c
+ * @brief Main program file containing the entry point.
+ */
+
+#include "WebShare-Connect.h"
 #include "server.h"
 #include "client.h"
 #include "removeQuotes.h"
 
-int userInput(int error) {
-	if (error == EOF) {
-		printf("Error reading input\n");
-		return 1;
-	}
-	else if (error < 0) {
-		printf("No input\n");
-		return 1;
-	}
-	return 0;
-}
-
+ /**
+  * @brief The main function. This is where the program starts.
+  *
+  * @param argc The number of arguments passed to the program.
+  * @param argv The arguments passed to the program.
+  *             - argv[0]: Program name
+  *             - argv[1]: Operation mode (server/client)
+  *             - argv[2]: Port number
+  *             - argv[3]: Number of threads
+  *             - argv[4]: File path
+  *
+  * @return 0 if the program exits successfully, 1 otherwise.
+  */
 int main(int argc, char const* argv[])
 {
     //if there are no arguments then ask for them

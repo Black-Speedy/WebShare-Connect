@@ -2,7 +2,11 @@
 #include <stdio.h>
 #include "removeQuotes.h"
 
-
+/**
+* @brief      Checks if a string contains double quotes.
+* @param[in]  str   The string to check.
+* @return     1 if the string contains double quotes, 0 otherwise.
+*/
 int containsQuotes(const char* str) {
     int singleQuoteAtBeginning = 0;
     if (*str == '\'') {
@@ -19,6 +23,11 @@ int containsQuotes(const char* str) {
     return singleQuoteAtBeginning;
 }
 
+/**
+* @brief      Removes double quotes from a string.
+* @param[in]  str   The string to remove double quotes from.
+* @return     A pointer to the modified string.
+*/
 char* removeQuotes(const char* str) {
     size_t len = strlen(str);
     char* newStr = (char*)malloc(len + 1); // Allocate memory for the modified string
