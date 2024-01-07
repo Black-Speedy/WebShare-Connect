@@ -13,6 +13,28 @@ find_package(czmq CONFIG REQUIRED)
 find_package(ZeroMQ CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 
+# Set the path to GLib include directory
+set(GLIB_INCLUDE_DIR "C:/PackageManagers/vcpkg/installed/x64-windows/include/glib-2.0")
+# Include GLib directories
+include_directories(${GLIB_INCLUDE_DIR})
+include_directories("C:/PackageManagers/vcpkg/installed/x64-windows/lib/glib-2.0/include")  # Path to glibconfig.h
+
+add_definitions(-DG_OS_WIN32)
+
+# Set the path to libnice include directory
+set(LIBNICE_INCLUDE_DIR "C:/PackageManagers/vcpkg/installed/x64-windows/include")
+
+# Include libnice directories
+include_directories(${LIBNICE_INCLUDE_DIR})
+include_directories("${LIBNICE_INCLUDE_DIR}/nice")  # Path to the 'nice' subdirectory containing address.h
+
+
+# Link against libnice library
+target_link_libraries(WebShare-Connect PRIVATE "C:/PackageManagers/vcpkg/installed/x64-windows/lib/glib-2.0.lib")
+target_link_libraries(WebShare-Connect PRIVATE "C:/PackageManagers/vcpkg/installed/x64-windows/lib/nice.lib")
+
+
+
 # Link libraries to your server executable.
 target_link_libraries(WebShare-Connect PRIVATE czmq)
 target_link_libraries(WebShare-Connect PRIVATE libzmq)
