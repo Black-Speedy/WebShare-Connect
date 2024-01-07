@@ -2,6 +2,7 @@
 #include "server.h"
 #include "client.h"
 #include "removeQuotes.h"
+#include <nice.h>
 
 int userInput(int error) {
 	if (error == EOF) {
