@@ -1,12 +1,32 @@
+/**
+ * @file client_main.c
+ * @brief Main client functionality.
+ */
+
 #include "WebShare-Connect.h"
 #include "client.h"
+#include "sha512.h"
 
-// This is the header for the file
+/**
+ * @brief Struct representing file information.
+ */
 typedef struct {
+    // This is the header for the file
     int64_t file_size;
-	int chunk_size;
+    int chunk_size;
+    unsigned char hash[SHA512_DIGEST_LENGTH];
 } file_header_t;
 
+/**
+ * @brief Sets up a client socket and connects to the server.
+ *
+ * Initializes and connects a client socket to the specified server port.
+ *
+ * @param context The ZeroMQ context.
+ * @param port The port of the server to connect to.
+ * @param threads The number of threads to use.
+ * @return A pointer to the created client socket.
+ */
 zsock_t* client(void* context, const char *port, int threads)
 {
 	int io_threads = threads;
@@ -16,7 +36,7 @@ zsock_t* client(void* context, const char *port, int threads)
 	zsock_t* client_sock = zsock_new(ZMQ_PAIR);
 	assert(client_sock);
 
-	int rc = zsock_connect(client_sock, "tcp://127.0.0.1:%s", port); // change to to server ip when running on different machines
+	int rc = zsock_connect(client_sock, "tcp://2.tcp.eu.ngrok.io:%s", port); // change to to server ip when running on different machines
 	assert(rc != -1);
 
 	zsock_set_rcvtimeo(client_sock, 2000); // 2s timeout for recv
@@ -24,24 +44,33 @@ zsock_t* client(void* context, const char *port, int threads)
 	return client_sock;
 }
 
+/**
+ * @brief Receives a file via the client socket.
+ *
+ * Receives the file header, then receives file chunks and writes them to the specified output file path.
+ * Computes the hash of the received file and compares it with the expected hash.
+ *
+ * @param client_sock The client socket used for receiving the file.
+ * @param output_file_path The path to save the received file.
+ */
 void client_receive(zsock_t* client_sock, const char* output_file_path) {
-    printf("Receiving file...\n");
+    printf("\n-- File Reception --\n");
 
     file_header_t header;
     size_t header_size = sizeof(file_header_t);
     byte* header_buf = NULL;
 
-    // Receive the header as a binary blob
+    // Receive the header
     int rc = zsock_recv(client_sock, "b", &header_buf, &header_size);
     if (rc == -1) {
-        fprintf(stderr, "Failed to receive header\n");
+        fprintf(stderr, "Error: Failed to receive header.\n");
         return;
     }
 
-    // Ensure the received header size matches the expected size
+    // Validate the header size
     if (header_size != sizeof(file_header_t)) {
-        fprintf(stderr, "Received header size does not match\n");
-        free(header_buf); // Free the received buffer
+        fprintf(stderr, "Error: Received header size does not match expected size.\n");
+        free(header_buf);
         return;
     }
 
@@ -53,21 +82,21 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
     memcpy(&header, header_buf, sizeof(header));
     free(header_buf); // Free the received buffer after copying
 
-    printf("Received file header\n");
     int64_t file_size = header.file_size;
     int chunk_size = header.chunk_size;
-    printf("Expected file size: %lld bytes\n", file_size);
-    printf("Chunk size: %d bytes\n", chunk_size);
+    printf("Header received successfully.\n");
+    printf("Expected file size: %lld bytes.\n", header.file_size);
+    printf("Chunk size: %d bytes.\n", header.chunk_size);
 
-    char* buffer = (char*)malloc(chunk_size);
-    if (buffer == NULL) {
-        fprintf(stderr, "Memory allocation error\n");
+    char* buffer = (char*)malloc(header.chunk_size);
+    if (!buffer) {
+        fprintf(stderr, "Error: Memory allocation failed.\n");
         return;
     }
 
     FILE* fp = fopen(output_file_path, "wb");
-    if (fp == NULL) {
-        fprintf(stderr, "File open error\n");
+    if (!fp) {
+        fprintf(stderr, "Error: File open failed.\n");
         free(buffer);
         return;
     }
@@ -93,16 +122,51 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
         }
         received_size += size;
         current_chunk++;
-        fflush(&buffer);
-        //printf("Received chunk %d/%d with size %zu bytes\n", current_chunk, chunk_count, size);
+        printf("Chunk %d/%d received. Size: %d bytes.\n", current_chunk, chunk_count, size);
     }
-
     free(buffer);
     fclose(fp);
-    printf("File reception completed.\n");
+    
+    // Compute hash of received file and compare with the expected hash
+    unsigned char* expected_hash = header.hash;
+    unsigned char received_hash[SHA512_DIGEST_LENGTH];
+    compute_sha512(output_file_path, received_hash); // Compute hash of received file
+    char received_hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
+    char expected_hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
+    convert_hash_to_hex_string(received_hash, received_hash_string, SHA512_DIGEST_LENGTH); // Convert received hash
+    convert_hash_to_hex_string(expected_hash, expected_hash_string, SHA512_DIGEST_LENGTH); // Convert expected hash
+
+    // Compare the raw binary hashes
+    if (memcmp(received_hash, expected_hash, SHA512_DIGEST_LENGTH) != 0) 
+    {
+        fprintf(stderr, "Received file hash does not match\n");
+        printf("Received Hash (binary): ");
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) 
+        {
+            printf("%02x", received_hash[i]);
+        }
+        printf("\nExpected Hash (binary): ");
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) 
+        {
+            printf("%02x", expected_hash[i]);
+        }
+        printf("\n");
+    }
+    else {
+        printf("File hash verified successfully.\n");
+    }
 }
 
-
+/**
+ * @brief The main function for the client.
+ *
+ * Initializes the ZeroMQ context, creates a client socket, connects to the server, and receives a file via the socket.
+ * Compares the received file's hash with the expected hash for integrity verification.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv The array of command-line arguments.
+ * @return An integer representing the exit status.
+ */
 int client_main(int argc, char const* argv[]) {
 	if (argc < 4)
 	{
@@ -125,7 +189,9 @@ int client_main(int argc, char const* argv[]) {
 
 	// Receive file
 	client_receive(client_sock, output_file_path);
-    printf("File received.\n");
+    printf("\x1b[32mFile transfer completed successfully.\x1b[32m\n ");
+    // return to normal color
+    printf("\x1b[0m");
 
 	// Clean up
 	zsock_destroy(&client_sock);

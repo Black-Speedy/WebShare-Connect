@@ -28,7 +28,7 @@ int compute_sha512(const char* path, unsigned char output[SHA512_DIGEST_LENGTH])
     while ((bytesRead = fread(buffer, 1, bufSize, file))) {
         SHA512_Update(&sha512, buffer, bytesRead);
     }
-
+    rewind(file); // Reset file pointer (not sure if this is necessary)
     free(buffer);
     fclose(file);
 
@@ -36,4 +36,11 @@ int compute_sha512(const char* path, unsigned char output[SHA512_DIGEST_LENGTH])
     SHA512_Final(output, &sha512);
 
     return 0;
+}
+
+void convert_hash_to_hex_string(unsigned char* hash, char* hex_string, size_t hash_length) {
+    for (size_t i = 0; i < hash_length; i++) {
+        sprintf(hex_string + (i * 2), "%02x", hash[i]);
+    }
+    hex_string[hash_length * 2] = '\0'; // Null-terminate the string
 }

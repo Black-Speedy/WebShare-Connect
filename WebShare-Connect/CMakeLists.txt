@@ -26,6 +26,7 @@ target_link_libraries(server PRIVATE libzmq)
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(client PRIVATE czmq)
 
+
 # Link libraries to your client executable.
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET WebShare-Connect PROPERTY C_STANDARD 11)

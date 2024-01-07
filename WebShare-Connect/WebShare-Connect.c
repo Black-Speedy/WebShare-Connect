@@ -1,20 +1,26 @@
-﻿#include "WebShare-Connect.h"
+﻿/**
+ * @file WebShare-Connect.c
+ * @brief Main program file containing the entry point.
+ */
+
+#include "WebShare-Connect.h"
 #include "server.h"
 #include "client.h"
 #include "removeQuotes.h"
 
-int userInput(int error) {
-	if (error == EOF) {
-		printf("Error reading input\n");
-		return 1;
-	}
-	else if (error < 0) {
-		printf("No input\n");
-		return 1;
-	}
-	return 0;
-}
-
+ /**
+  * @brief The main function. This is where the program starts.
+  *
+  * @param argc The number of arguments passed to the program.
+  * @param argv The arguments passed to the program.
+  *             - argv[0]: Program name
+  *             - argv[1]: Operation mode (server/client)
+  *             - argv[2]: Port number
+  *             - argv[3]: Number of threads
+  *             - argv[4]: File path
+  *
+  * @return 0 if the program exits successfully, 1 otherwise.
+  */
 int main(int argc, char const* argv[])
 {
     //if there are no arguments then ask for them
@@ -30,7 +36,7 @@ int main(int argc, char const* argv[])
             error = scanf("%9s", mode);
             if (error != 1) {
                 printf("Input error. Please try again.\n");
-                scanf("%*[^\n]"); // Clear the input buffer
+                error = scanf("%*[^\n]"); // Clear the input buffer
             }
             else if (strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0) {
                 printf("Invalid mode entered. Please try again.\n");
@@ -42,23 +48,23 @@ int main(int argc, char const* argv[])
             error = scanf("%5s", port);
             if (error != 1) {
                 printf("Input error. Please try again.\n");
-                scanf("%*[^\n]"); // Clear the input buffer
+                error = scanf("%*[^\n]"); // Clear the input buffer
             }
             else {
                 int portNum = atoi(port);
                 if (portNum < 0 || portNum > 65535) {
-                    printf("Invalid port number. Please enter a number between 0 and 65535.\n");
+                    printf("Invalid port number. Please enter a number between 0 and 65535: ");
                     error = 0;
                 }
             }
         } while (error != 1);
 
         do {
-            printf("Please enter the number of threads:\n");
+            printf("Please enter the number of threads: ");
             error = scanf("%3s", threads);
             if (error != 1) {
                 printf("Input error. Please try again.\n");
-                scanf("%*[^\n]"); // Clear the input buffer
+                error = scanf("%*[^\n]"); // Clear the input buffer
             }
             //else {
                 int threadNum = atoi(threads);
@@ -70,7 +76,7 @@ int main(int argc, char const* argv[])
         } while (error != 1);
 
         printf("Please enter the file path: ");
-        scanf("%255s", filePath);
+        error = scanf("%255s", filePath);
 
         user_argv[0] = strdup(argv[0]); // Program name
         user_argv[1] = strdup(mode);
@@ -89,7 +95,7 @@ int main(int argc, char const* argv[])
             return server_main(4, user_argv + 1); // 4 is the number of arguments in user_argv
         }
         else {
-            return client_main(argc, user_argv + 1);
+            return client_main(4, user_argv + 1);
         }
     }
 

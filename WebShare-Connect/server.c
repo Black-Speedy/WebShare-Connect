@@ -1,13 +1,32 @@
+/**
+ * @file client_main.c
+ * @brief Main server functionality.
+ */
 #include "WebShare-Connect.h"
 #include "server.h"
 #include "sha512.h"
 
-// This is the header for the file
+
+/**
+ * @brief Struct representing file information.
+ */
 typedef struct {
+	// This is the header for the file
 	int64_t file_size;
 	int chunk_size;
+	unsigned char hash[SHA512_DIGEST_LENGTH];
 } file_header_t;
 
+/**
+ * @brief Sets up a server socket.
+ *
+ * Initializes and binds a server socket to the specified port.
+ *
+ * @param context The ZeroMQ context.
+ * @param port The port to bind the server socket to.
+ * @param threads The number of threads to use.
+ * @return A pointer to the created server socket.
+ */
 zsock_t* server(void* context, const char *port, int threads)
 {
 	int io_threads = threads;
@@ -25,28 +44,34 @@ zsock_t* server(void* context, const char *port, int threads)
 	return serv_sock;
 }
 
+/**
+ * @brief Sends a file via the server socket.
+ *
+ * Reads the specified file, computes its hash, and sends it in chunks via the server socket.
+ *
+ * @param serv_sock The server socket to use for sending the file.
+ * @param file_path The path to the file to be sent.
+ */
 void server_send(zsock_t* serv_sock, const char* file_path)
 {
 	// Open file
-	FILE *fp = fopen(file_path, "rb");
-	if (fp == NULL)
-	{
-		printf("File open error\n");
+	FILE* fp = fopen(file_path, "rb");
+	if (!fp) {
+		printf("Error: File open failed.\n");
 		return;
 	}
 
 	// Determine file size
 	fseek(fp, 0L, SEEK_END);
 	int64_t file_size = _ftelli64(fp);
-	rewind(fp); 
-	if (file_size < 1)
-	{
-		printf("File size error\n");
+	rewind(fp);
+	if (file_size < 1) {
+		printf("Error: File size error.\n");
 		fclose(fp);
 		return;
 	}
 
-	printf("File size: %lld bytes\n", file_size);
+	printf("  File size: %lld bytes\n", file_size);
 
 	int chunk_size;
 
@@ -88,42 +113,52 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		chunk_size = 1 << 24;
 	}
 
-	printf("Chunk size: %d bytes\n", chunk_size);
+	printf("  Chunk size: %d bytes\n", chunk_size);
+
+	// Compute hash
+	unsigned char hash[SHA512_DIGEST_LENGTH];
+	compute_sha512(file_path, hash);
 
 	file_header_t header;
 	header.file_size = file_size;
 	header.chunk_size = chunk_size;
+	memcpy(header.hash, hash, SHA512_DIGEST_LENGTH);
+
+	// Convert hash to hex string
+	char hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
+	convert_hash_to_hex_string(hash, hash_string, SHA512_DIGEST_LENGTH);
+	printf("  Hash: %s\n", hash_string);
 
 	// Send file header
 	zsock_send(serv_sock, "b", &header, sizeof(header));
-	printf("Sent file header\n");
 
-	// Send file size
+	// Allocate buffer and send file
 	char* buffer = (char*)malloc(chunk_size);
-	if (buffer == NULL)
-	{
-		printf("Failed to allocate memory\n");
+	if (!buffer) {
+		printf("Error: Memory allocation failed.\n");
 		fclose(fp);
 		return;
 	}
 
-	int chunk_count = file_size / chunk_size + (file_size % chunk_size != 0);
+	int64_t chunk_count = file_size / (int64_t)chunk_size + (file_size % (int64_t)chunk_size != 0);
 	int current_chunk = 0;
-	printf("Total chunks to send: %d\n", chunk_count);
+	printf("  Total chunks to send: %lld\n", chunk_count);
 
-	// Send file size until end of file
-	while (!feof(fp)) {
+	while (1) {
+		memset(buffer, 0, chunk_size); // Clear the buffer before reading
 		size_t bytesRead = fread(buffer, 1, chunk_size, fp);
-		if (ferror(fp)) {
-			perror("Error reading file");
-			break;
+		if (bytesRead == 0) {
+			if (ferror(fp)) {
+				perror("Error reading file");
+			}
+			break; // Break the loop if no more data to read
 		}
 		zsock_send(serv_sock, "b", buffer, bytesRead); // Send file chunk
 
 		current_chunk++;
 		if (current_chunk % 100 == 0)
 		{
-			printf("Sent chunk %d/%d with size %lld bytes\n", current_chunk, chunk_count, bytesRead);
+			printf("Sent chunk %d/%lld with size %lld bytes\n", current_chunk, chunk_count, bytesRead);
 		}
 		
 		
@@ -139,10 +174,21 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 		}
 		free(ack);
 	}
+
 	free(buffer);
 	fclose(fp);
 }
 
+
+/**
+ * @brief The main function for the server.
+ *
+ * Initializes the ZeroMQ context, creates a server socket, and sends a file via the socket.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv The array of command-line arguments.
+ * @return An integer representing the exit status.
+ */
 int server_main(int argc, char const* argv[]) {
 	if (argc < 4) 
 	{
