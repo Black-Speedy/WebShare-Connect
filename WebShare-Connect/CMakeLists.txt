@@ -14,15 +14,15 @@ find_package(ZeroMQ CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
 
 # Set the path to GLib include directory
-set(GLIB_INCLUDE_DIR "C:/PackageManagers/vcpkg/installed/x64-windows/include/glib-2.0")
+set(GLIB_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/x64-windows/include/glib-2.0")
 # Include GLib directories
 include_directories(${GLIB_INCLUDE_DIR})
-include_directories("C:/PackageManagers/vcpkg/installed/x64-windows/lib/glib-2.0/include")  # Path to glibconfig.h
+include_directories("${_VCPKG_INSTALLED_DIR}/x64-windows/lib/glib-2.0/include")  # Path to glibconfig.h
 
 add_definitions(-DG_OS_WIN32)
 
 # Set the path to libnice include directory
-set(LIBNICE_INCLUDE_DIR "C:/PackageManagers/vcpkg/installed/x64-windows/include")
+set(LIBNICE_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/x64-windows/include")
 
 # Include libnice directories
 include_directories(${LIBNICE_INCLUDE_DIR})
@@ -30,8 +30,8 @@ include_directories("${LIBNICE_INCLUDE_DIR}/nice")  # Path to the 'nice' subdire
 
 
 # Link against libnice library
-target_link_libraries(WebShare-Connect PRIVATE "C:/PackageManagers/vcpkg/installed/x64-windows/lib/glib-2.0.lib")
-target_link_libraries(WebShare-Connect PRIVATE "C:/PackageManagers/vcpkg/installed/x64-windows/lib/nice.lib")
+target_link_libraries(WebShare-Connect PRIVATE "${_VCPKG_INSTALLED_DIR}/x64-windows/lib/glib-2.0.lib")
+target_link_libraries(WebShare-Connect PRIVATE "${_VCPKG_INSTALLED_DIR}/x64-windows/lib/nice.lib")
 
 
 
