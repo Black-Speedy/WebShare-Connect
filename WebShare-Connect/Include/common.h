@@ -7,7 +7,7 @@
 
 /*
  * add macros and function declarations which should be
- * common between the name server and peer programs in this file.
+ * common between the name sender and peer programs in this file.
  */
 
 #define COMMAND_REGISTER        1

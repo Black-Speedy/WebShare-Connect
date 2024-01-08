@@ -1,6 +1,6 @@
 /**
-* @file client.h
-* @brief Header file for the main client functionality.
+* @file sender.h
+* @brief Header file for the main sender functionality.
 */
 
 /**
@@ -25,39 +25,35 @@
 #define FILE_SIZE_35GB		35 * 1000 * 1000 * 1000LL	/**<  35 GB in bytes */
 #define FILE_SIZE_50GB		50 * 1000 * 1000 * 1000LL	/**<  50 GB in bytes */
 
-#include "server.h"
 
 /**
- * @brief Sets up a client socket and connects to the server.
+ * @brief Sets up a sender socket.
  *
- * Initializes and connects a client socket to the specified server port.
+ * Initializes and binds a sender socket to the specified port.
  *
  * @param context The ZeroMQ context.
- * @param port The port of the server to connect to.
+ * @param port The port to bind the sender socket to.
  * @param threads The number of threads to use.
- * @return A pointer to the created client socket.
+ * @return A pointer to the created sender socket.
  */
-zsock_t* client(void* context, const char* port, int threads);
+zsock_t* sender(void* context, const char* port, int threads);
+/**
+ * @brief Sends a file via the sender socket.
+ *
+ * Reads the specified file, computes its hash, and sends it in chunks via the sender socket.
+ *
+ * @param serv_sock The sender socket to use for sending the file.
+ * @param file_path The path to the file to be sent.
+ */
+void sender_send(zsock_t* serv_sock, const char* output_file_path);
 
 /**
- * @brief Receives a file via the client socket.
+ * @brief The main function for the sender.
  *
- * Receives the file header, then receives file chunks and writes them to the specified output file path.
- * Computes the hash of the received file and compares it with the expected hash.
- *
- * @param client_sock The client socket used for receiving the file.
- * @param output_file_path The path to save the received file.
- */
-void client_receive(zsock_t* client_sock, const char* output_file_path);
-
-/**
- * @brief The main function for the client.
- *
- * Initializes the ZeroMQ context, creates a client socket, connects to the server, and receives a file via the socket.
- * Compares the received file's hash with the expected hash for integrity verification.
+ * Initializes the ZeroMQ context, creates a sender socket, and sends a file via the socket.
  *
  * @param argc The number of command-line arguments.
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int client_main(int argc, char const* argv[]);
+int sender_main(int argc, char const* argv[]);

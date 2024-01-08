@@ -4,8 +4,8 @@
  */
 
 #include "WebShare-Connect.h"
-#include "server.h"
-#include "client.h"
+#include "sender.h"
+#include "receiver.h"
 #include "removeQuotes.h"
 
  /**
@@ -14,7 +14,7 @@
   * @param argc The number of arguments passed to the program.
   * @param argv The arguments passed to the program.
   *             - argv[0]: Program name
-  *             - argv[1]: Operation mode (server/client)
+  *             - argv[1]: Operation mode (sender/receiver)
   *             - argv[2]: Port number
   *             - argv[3]: Number of threads
   *             - argv[4]: File path
@@ -30,18 +30,18 @@ int main(int argc, char const* argv[])
         char port[6];
 		char threads[4];
         char filePath[256];
-        char* user_argv[5]; // Array of arguments to pass to server_main or client_main
+        char* user_argv[5]; // Array of arguments to pass to sender_main or receiver_main
         do {
-            printf("Please enter either 'server' or 'client': ");
+            printf("Please enter either 'sender' or 'receiver': ");
             error = scanf("%9s", mode);
             if (error != 1) {
                 printf("Input error. Please try again.\n");
                 error = scanf("%*[^\n]"); // Clear the input buffer
             }
-            else if (strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0) {
+            else if (strcmp(mode, "sender") != 0 && strcmp(mode, "receiver") != 0) {
                 printf("Invalid mode entered. Please try again.\n");
             }
-        } while (strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0);
+        } while (strcmp(mode, "sender") != 0 && strcmp(mode, "receiver") != 0);
 
         do {
             printf("Please enter the port (0-65535): ");
@@ -90,23 +90,23 @@ int main(int argc, char const* argv[])
         }
         else user_argv[4] = strdup(filePath);
 
-        if (strcmp(mode, "server") == 0) {
+        if (strcmp(mode, "sender") == 0) {
 
-            return server_main(4, user_argv + 1); // 4 is the number of arguments in user_argv
+            return sender_main(4, user_argv + 1); // 4 is the number of arguments in user_argv
         }
         else {
-            return client_main(4, user_argv + 1);
+            return receiver_main(4, user_argv + 1);
         }
     }
 
-    if (strcmp(argv[1], "server") == 0) {
-        return server_main(argc - 1, argv + 1); //what does argv + 1 do? a: it is a pointer to the next element in the array of arguments
+    if (strcmp(argv[1], "sender") == 0) {
+        return sender_main(argc - 1, argv + 1); //what does argv + 1 do? a: it is a pointer to the next element in the array of arguments
     }
-    else if (strcmp(argv[1], "client") == 0) {
-        return client_main(argc - 1, argv + 1);
+    else if (strcmp(argv[1], "receiver") == 0) {
+        return receiver_main(argc - 1, argv + 1);
     }
     else {
-        printf("Usage: %s [server|client]\n", argv[0]);
+        printf("Usage: %s [sender|receiver]\n", argv[0]);
 		return 1;
     }
 }

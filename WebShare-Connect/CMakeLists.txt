@@ -4,7 +4,7 @@ project(WebShare-Connect)
 # Add include directories to your project.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 
-# Add server executable to the project.
+# Add sender executable to the project.
 add_executable(WebShare-Connect 
     "WebShare-Connect.c" 
     "WebShare-Connect.h"
@@ -12,17 +12,14 @@ add_executable(WebShare-Connect
 
 # Add libraries
 add_library(sha512 "sha512.c" "sha512.h")
-add_library(server "server.c" "server.h")
-add_library(client "client.c" "client.h")
+add_library(sender "sender.c" "sender.h")
+add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
 
 # Find packages
 find_package(czmq CONFIG REQUIRED)
 find_package(ZeroMQ CONFIG REQUIRED)
 find_package(OpenSSL REQUIRED)
-
-# Set Vcpkg directory
-set(_VCPKG_INSTALLED_DIR "C:/PackageManagers/vcpkg/installed")
 
 # Set include directories
 set(GLIB_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/x64-windows/include/glib-2.0")
@@ -42,16 +39,16 @@ target_link_libraries(WebShare-Connect PRIVATE
     czmq 
     libzmq 
     sha512 
-    server 
-    client 
+    sender 
+    receiver 
     OpenSSL::SSL 
     OpenSSL::Crypto 
     removeQuotes
 )
 
-# Link libraries to server and client targets
-target_link_libraries(server PRIVATE czmq libzmq sha512 OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(client PRIVATE czmq)
+# Link libraries to sender and receiver targets
+target_link_libraries(sender PRIVATE czmq libzmq sha512 OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(receiver PRIVATE czmq)
 
 # Set C standard
 set_property(TARGET WebShare-Connect PROPERTY C_STANDARD 11)
