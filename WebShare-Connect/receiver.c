@@ -190,8 +190,12 @@ int receiver_main(int argc, char const* argv[]) {
     // Receive file
     receiver_receive(receiver_sock, output_file_path);
     printf("\x1b[32mFile transfer completed successfully.\x1b[32m\n ");
-    // return to normal color
-    printf("\x1b[0m");
+    // return to normal colorr
+    printf("\x1b[0m\n");
+
+    printf("Press Enter to exit.\n");
+    char x = getchar();
+    scanf("%c", &x) ? x : x;
 
     // Clean up
     zsock_destroy(&receiver_sock);
