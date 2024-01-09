@@ -5,6 +5,7 @@
 #include "WebShare-Connect.h"
 #include "sender.h"
 #include "sha512.h"
+#include "nice.h"
 
 
 /**

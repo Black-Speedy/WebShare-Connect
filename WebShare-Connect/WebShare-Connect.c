@@ -7,6 +7,7 @@
 #include "sender.h"
 #include "receiver.h"
 #include "removeQuotes.h"
+#include "nice.h"
 
  /**
   * @brief The main function. This is where the program starts.

@@ -6,6 +6,7 @@
 #include "WebShare-Connect.h"
 #include "receiver.h"
 #include "sha512.h"
+#include "nice.h"
 
  /**
   * @brief Struct representing file information.
