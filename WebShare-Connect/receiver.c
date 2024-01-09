@@ -1,15 +1,16 @@
 /**
- * @file client_main.c
- * @brief Main client functionality.
+ * @file receiver_main.c
+ * @brief Main receiver functionality.
  */
 
 #include "WebShare-Connect.h"
-#include "client.h"
+#include "receiver.h"
 #include "sha512.h"
+#include "nice.h"
 
-/**
- * @brief Struct representing file information.
- */
+ /**
+  * @brief Struct representing file information.
+  */
 typedef struct {
     // This is the header for the file
     int64_t file_size;
@@ -18,42 +19,42 @@ typedef struct {
 } file_header_t;
 
 /**
- * @brief Sets up a client socket and connects to the server.
+ * @brief Sets up a receiver socket and connects to the sender.
  *
- * Initializes and connects a client socket to the specified server port.
+ * Initializes and connects a receiver socket to the specified sender port.
  *
  * @param context The ZeroMQ context.
- * @param port The port of the server to connect to.
+ * @param port The port of the sender to connect to.
  * @param threads The number of threads to use.
- * @return A pointer to the created client socket.
+ * @return A pointer to the created receiver socket.
  */
-zsock_t* client(void* context, const char *port, int threads)
+zsock_t* receiver(void* context, const char* port, int threads)
 {
-	int io_threads = threads;
-	zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
-	assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
+    int io_threads = threads;
+    zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
+    assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
 
-	zsock_t* client_sock = zsock_new(ZMQ_PAIR);
-	assert(client_sock);
+    zsock_t* receiver_sock = zsock_new(ZMQ_PAIR);
+    assert(receiver_sock);
 
-	int rc = zsock_connect(client_sock, "tcp://2.tcp.eu.ngrok.io:%s", port); // change to to server ip when running on different machines
-	assert(rc != -1);
+    int rc = zsock_connect(receiver_sock, "tcp://2.tcp.eu.ngrok.io:%s", port); // change to to sender ip when running on different machines
+    assert(rc != -1);
 
-	zsock_set_rcvtimeo(client_sock, 2000); // 2s timeout for recv
+    zsock_set_rcvtimeo(receiver_sock, 2000); // 2s timeout for recv
 
-	return client_sock;
+    return receiver_sock;
 }
 
 /**
- * @brief Receives a file via the client socket.
+ * @brief Receives a file via the receiver socket.
  *
  * Receives the file header, then receives file chunks and writes them to the specified output file path.
  * Computes the hash of the received file and compares it with the expected hash.
  *
- * @param client_sock The client socket used for receiving the file.
+ * @param receiver_sock The receiver socket used for receiving the file.
  * @param output_file_path The path to save the received file.
  */
-void client_receive(zsock_t* client_sock, const char* output_file_path) {
+void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
     printf("\n-- File Reception --\n");
 
     file_header_t header;
@@ -61,7 +62,7 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
     byte* header_buf = NULL;
 
     // Receive the header
-    int rc = zsock_recv(client_sock, "b", &header_buf, &header_size);
+    int rc = zsock_recv(receiver_sock, "b", &header_buf, &header_size);
     if (rc == -1) {
         fprintf(stderr, "Error: Failed to receive header.\n");
         return;
@@ -76,9 +77,9 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
 
     // Copy the received data into the header structure
     if (header_buf == NULL) {
-		fprintf(stderr, "Received header is NULL\n");
-		return;
-	}
+        fprintf(stderr, "Received header is NULL\n");
+        return;
+    }
     memcpy(&header, header_buf, sizeof(header));
     free(header_buf); // Free the received buffer after copying
 
@@ -106,7 +107,7 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
     int current_chunk = 0;
 
     while (received_size < file_size) {
-        int size = zmq_recv(zsock_resolve(client_sock), buffer, chunk_size, 0);
+        int size = zmq_recv(zsock_resolve(receiver_sock), buffer, chunk_size, 0);
         if (size == -1) {
             fprintf(stderr, "Error receiving data: %s\n", zmq_strerror(errno));
             break;
@@ -117,7 +118,7 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
             fprintf(stderr, "Error writing to file: expected %d bytes, wrote %zu bytes\n", size, written);
             break;
         }
-        if (zstr_send(client_sock, "ACK") == -1) {
+        if (zstr_send(receiver_sock, "ACK") == -1) {
             fprintf(stderr, "Error sending acknowledgment: %s\n", zmq_strerror(errno));
         }
         received_size += size;
@@ -126,7 +127,7 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
     }
     free(buffer);
     fclose(fp);
-    
+
     // Compute hash of received file and compare with the expected hash
     unsigned char* expected_hash = header.hash;
     unsigned char received_hash[SHA512_DIGEST_LENGTH];
@@ -137,16 +138,16 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
     convert_hash_to_hex_string(expected_hash, expected_hash_string, SHA512_DIGEST_LENGTH); // Convert expected hash
 
     // Compare the raw binary hashes
-    if (memcmp(received_hash, expected_hash, SHA512_DIGEST_LENGTH) != 0) 
+    if (memcmp(received_hash, expected_hash, SHA512_DIGEST_LENGTH) != 0)
     {
         fprintf(stderr, "Received file hash does not match\n");
         printf("Received Hash (binary): ");
-        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) 
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
         {
             printf("%02x", received_hash[i]);
         }
         printf("\nExpected Hash (binary): ");
-        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) 
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
         {
             printf("%02x", expected_hash[i]);
         }
@@ -158,44 +159,48 @@ void client_receive(zsock_t* client_sock, const char* output_file_path) {
 }
 
 /**
- * @brief The main function for the client.
+ * @brief The main function for the receiver.
  *
- * Initializes the ZeroMQ context, creates a client socket, connects to the server, and receives a file via the socket.
+ * Initializes the ZeroMQ context, creates a receiver socket, connects to the sender, and receives a file via the socket.
  * Compares the received file's hash with the expected hash for integrity verification.
  *
  * @param argc The number of command-line arguments.
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int client_main(int argc, char const* argv[]) {
-	if (argc < 4)
-	{
-		printf("Usage: %s client [port] [threads] [output file path]\n", argv[0]);
-		return 1;
-	}
+int receiver_main(int argc, char const* argv[]) {
+    if (argc < 4)
+    {
+        printf("Usage: %s receiver [port] [threads] [output file path]\n", argv[0]);
+        return 1;
+    }
 
-	const char* port = argv[1];
-	int threads = atoi(argv[2]);
-	const char* output_file_path = argv[3];
+    const char* port = argv[1];
+    int threads = atoi(argv[2]);
+    const char* output_file_path = argv[3];
 
-    printf("Connecting to server at port %s...\n", port);
+    printf("Connecting to sender at port %s...\n", port);
 
-	void* context = zmq_ctx_new();
-	assert(context);
+    void* context = zmq_ctx_new();
+    assert(context);
 
-	// Create and bind the PULL socket
-	zsock_t* client_sock = client(context, port, threads);
-	assert(client_sock);
+    // Create and bind the PULL socket
+    zsock_t* receiver_sock = receiver(context, port, threads);
+    assert(receiver_sock);
 
-	// Receive file
-	client_receive(client_sock, output_file_path);
+    // Receive file
+    receiver_receive(receiver_sock, output_file_path);
     printf("\x1b[32mFile transfer completed successfully.\x1b[32m\n ");
-    // return to normal color
-    printf("\x1b[0m");
+    // return to normal colorr
+    printf("\x1b[0m\n");
 
-	// Clean up
-	zsock_destroy(&client_sock);
-	zmq_ctx_destroy(&context);
+    printf("Press Enter to exit.\n");
+    char x = getchar();
+    scanf("%c", &x) ? x : x;
 
-	return 0;
+    // Clean up
+    zsock_destroy(&receiver_sock);
+    zmq_ctx_destroy(&context);
+
+    return 0;
 }

@@ -1,10 +1,11 @@
 /**
- * @file client_main.c
- * @brief Main server functionality.
+ * @file receiver_main.c
+ * @brief Main sender functionality.
  */
 #include "WebShare-Connect.h"
-#include "server.h"
+#include "sender.h"
 #include "sha512.h"
+#include "nice.h"
 
 
 /**
@@ -18,16 +19,16 @@ typedef struct {
 } file_header_t;
 
 /**
- * @brief Sets up a server socket.
+ * @brief Sets up a sender socket.
  *
- * Initializes and binds a server socket to the specified port.
+ * Initializes and binds a sender socket to the specified port.
  *
  * @param context The ZeroMQ context.
- * @param port The port to bind the server socket to.
+ * @param port The port to bind the sender socket to.
  * @param threads The number of threads to use.
- * @return A pointer to the created server socket.
+ * @return A pointer to the created sender socket.
  */
-zsock_t* server(void* context, const char *port, int threads)
+zsock_t* sender(void* context, const char *port, int threads)
 {
 	int io_threads = threads;
 	zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
@@ -45,14 +46,14 @@ zsock_t* server(void* context, const char *port, int threads)
 }
 
 /**
- * @brief Sends a file via the server socket.
+ * @brief Sends a file via the sender socket.
  *
- * Reads the specified file, computes its hash, and sends it in chunks via the server socket.
+ * Reads the specified file, computes its hash, and sends it in chunks via the sender socket.
  *
- * @param serv_sock The server socket to use for sending the file.
+ * @param serv_sock The sender socket to use for sending the file.
  * @param file_path The path to the file to be sent.
  */
-void server_send(zsock_t* serv_sock, const char* file_path)
+void sender_send(zsock_t* serv_sock, const char* file_path)
 {
 	// Open file
 	FILE* fp = fopen(file_path, "rb");
@@ -181,18 +182,18 @@ void server_send(zsock_t* serv_sock, const char* file_path)
 
 
 /**
- * @brief The main function for the server.
+ * @brief The main function for the sender.
  *
- * Initializes the ZeroMQ context, creates a server socket, and sends a file via the socket.
+ * Initializes the ZeroMQ context, creates a sender socket, and sends a file via the socket.
  *
  * @param argc The number of command-line arguments.
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int server_main(int argc, char const* argv[]) {
+int sender_main(int argc, char const* argv[]) {
 	if (argc < 4) 
 	{
-		printf("Usage: %s server [port] [threads] [file_path]\n", argv[-1]);
+		printf("Usage: %s sender [port] [threads] [file_path]\n", argv[-1]);
 		return 1;
 	}
 
@@ -205,11 +206,11 @@ int server_main(int argc, char const* argv[]) {
 	assert(context);
 
 	// Create and bind the PUSH socket
-	zsock_t* serv_sock = server(context, port, threads);
+	zsock_t* serv_sock = sender(context, port, threads);
 	assert(serv_sock);
 
 	// Send the file
-	server_send(serv_sock, file_path);
+	sender_send(serv_sock, file_path);
 
 	// Clean up
 	zsock_destroy(&serv_sock);
@@ -219,4 +220,4 @@ int server_main(int argc, char const* argv[]) {
 }
 
 // TODO: Maybe multithread the computing of the hash and sending of the file chunks. 
-// So the server can send the file chunks while the hash is being computed.
+// So the sender can send the file chunks while the hash is being computed.
