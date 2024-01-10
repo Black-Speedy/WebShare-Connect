@@ -76,8 +76,11 @@ int main(int argc, char const* argv[])
             //}
         } while (error != 1);
 
+        int c;
+        while ((c = getchar()) != '\n' && c != EOF);
         printf("Please enter the file path: ");
-        error = scanf("%255s", filePath);
+        fgets(filePath, 256, stdin);
+        filePath[strcspn(filePath, "\n")] = 0; // Remove trailing newline
 
         user_argv[0] = strdup(argv[0]); // Program name
         user_argv[1] = strdup(mode);
@@ -92,7 +95,6 @@ int main(int argc, char const* argv[])
         else user_argv[4] = strdup(filePath);
 
         if (strcmp(mode, "sender") == 0) {
-
             return sender_main(4, user_argv + 1); // 4 is the number of arguments in user_argv
         }
         else {
