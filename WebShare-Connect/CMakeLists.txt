@@ -44,9 +44,24 @@ target_link_libraries(WebShare-Connect PRIVATE
     LibNice::LibNice
 )
 
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+find_package(LibNice REQUIRED)
 # Link libraries to sender and receiver targets
-target_link_libraries(sender PRIVATE czmq libzmq sha512 OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(receiver PRIVATE czmq)
+target_link_libraries(sender PRIVATE 
+    czmq 
+    libzmq 
+    sha512 
+    OpenSSL::SSL 
+    OpenSSL::Crypto
+    LibNice::LibNice)
+
+    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
+
+find_package(LibNice REQUIRED)
+target_link_libraries(receiver PRIVATE 
+    czmq
+    LibNice::LibNice)
 
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
