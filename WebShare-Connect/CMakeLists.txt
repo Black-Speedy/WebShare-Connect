@@ -1,6 +1,9 @@
 ﻿cmake_minimum_required(VERSION 3.12)
 project(WebShare-Connect)
 
+set (CMAKE_VERBOSE_MAKEFILE 1)
+set (CMAKE_C_FLAGS "-Wall")
+
 # Add include directories to your project.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
 
@@ -16,33 +19,20 @@ add_library(sender "sender.c" "sender.h")
 add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
 
-# Find packages
-find_package(czmq CONFIG REQUIRED)
-find_package(ZeroMQ CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
+# Find packages using PkgConfig
+find_package(PkgConfig REQUIRED)
+message(STATUS "PkgConfig found: ${PKG_CONFIG_FOUND}\nThe path is: ${PKG_CONFIG_EXECUTABLE}")
 
-add_definitions(-DG_OS_WIN32)
-# Set include directories
-set(INCLUSIONS "${_VCPKG_INSTALLED_DIR}/x64-windows/include")
-set(LIBRARIES  "${_VCPKG_INSTALLED_DIR}/x64-windows/lib")
 
-set(GLIB_INCLUDE_DIR "${INCLUSIONS}/glib-2.0")
-set(GLIB_LIB_DIR "${LIBRARIES}/glib-2.0.lib")
-set(GLIB_CONF "${LIBRARIES}/glib-2.0/include")
+set(ENV{PKG_CONFIG_PATH} "${VCPKG_INSTALLED_DIR}/x64-windows/lib/pkgconfig")
+message(STATUS "PKG_CONFIG_PATH: $ENV{PKG_CONFIG_PATH}")
 
-set(LIBNICE_INCLUDE_DIR "${INCLUSIONS}/nice")
-set(LIBNICE_LIB_DIR "${LIBRARIES}/nice.lib")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-# Include directories
-include_directories(${GLIB_INCLUDE_DIR}) 
-include_directories(${GLIB_LIB_DIR})
-include_directories(${GLIB_CONF})
-include_directories(${LIBNICE_INCLUDE_DIR})
+find_package(LibNice REQUIRED)
 
 # Link against libraries
 target_link_libraries(WebShare-Connect PRIVATE 
-    ${GLIB_LIB_DIR} # Link against the actual GLib library file
-    ${LIBNICE_LIB_DIR}
     czmq 
     libzmq 
     sha512 
@@ -51,6 +41,7 @@ target_link_libraries(WebShare-Connect PRIVATE
     OpenSSL::SSL 
     OpenSSL::Crypto 
     removeQuotes
+    LibNice::LibNice
 )
 
 # Link libraries to sender and receiver targets
