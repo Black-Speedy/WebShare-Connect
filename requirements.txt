@@ -1,2 +1,4 @@
 czmq
 openssl
+pkgconf
+libnice
