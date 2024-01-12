@@ -2,7 +2,13 @@
 project(WebShare-Connect)
 
 set (CMAKE_VERBOSE_MAKEFILE 1)
-set (CMAKE_C_FLAGS "-Wall")
+if (MSVC)
+    # Use different flags for MSVC
+    set(CMAKE_C_FLAGS "/Wall /w14242 /W4 ")
+else()
+    # Use your original flags for other compilers
+    set(CMAKE_C_FLAGS "-Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef")
+endif()
 
 # Add include directories to your project.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
@@ -15,6 +21,13 @@ add_executable(WebShare-Connect
 
 # Add libraries
 add_library(sha512 "sha512.c" "sha512.h")
+# Disable all warnings for the sha512 library
+if (MSVC)
+    target_compile_options(sha512 PRIVATE /w)
+else()
+    target_compile_options(sha512 PRIVATE -w)
+endif()
+
 add_library(sender "sender.c" "sender.h")
 add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
