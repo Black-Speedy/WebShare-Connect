@@ -1,10 +1,11 @@
 ﻿cmake_minimum_required(VERSION 3.12)
-project(WebShare-Connect)
+project(WebShare-Connect LANGUAGES C VERSION 0.0.1)
 
-set (CMAKE_VERBOSE_MAKEFILE 1)
+set(CMAKE_VERBOSE_MAKEFILE 1)
+
 if (MSVC)
     # Use different flags for MSVC
-    set(CMAKE_C_FLAGS "/Wall /w14242 /W4 ")
+    set(CMAKE_C_FLAGS "/Wall /w14242 /W4")
 else()
     # Use your original flags for other compilers
     set(CMAKE_C_FLAGS "-Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef")
@@ -32,49 +33,37 @@ add_library(sender "sender.c" "sender.h")
 add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
 
-# Find packages using PkgConfig
-find_package(PkgConfig REQUIRED)
-message(STATUS "PkgConfig found: ${PKG_CONFIG_FOUND}\nThe path is: ${PKG_CONFIG_EXECUTABLE}")
-
-
-set(ENV{PKG_CONFIG_PATH} "${VCPKG_INSTALLED_DIR}/x64-windows/lib/pkgconfig")
-message(STATUS "PKG_CONFIG_PATH: $ENV{PKG_CONFIG_PATH}")
-
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
-find_package(LibNice REQUIRED)
+# Include the OpenSSL include directory
+include_directories(${OPENSSL_INCLUDE_DIR})
+include_directories(${ZMQ_INCLUDE_DIRS})
+message("ZMQ_INCLUDE_DIRS: ${ZMQ_INCLUDE_DIRS}")
 
 # Link against libraries
 target_link_libraries(WebShare-Connect PRIVATE 
-    czmq 
-    libzmq 
-    sha512 
+    sha512
     sender 
     receiver 
     OpenSSL::SSL 
     OpenSSL::Crypto 
     removeQuotes
     LibNice::LibNice
-)
+    )
 
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
-find_package(LibNice REQUIRED)
 # Link libraries to sender and receiver targets
 target_link_libraries(sender PRIVATE 
     czmq 
-    libzmq 
+    libzmq
     sha512 
     OpenSSL::SSL 
     OpenSSL::Crypto
-    LibNice::LibNice)
+    LibNice::LibNice
+)
 
-    set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
-find_package(LibNice REQUIRED)
 target_link_libraries(receiver PRIVATE 
     czmq
-    LibNice::LibNice)
+    libzmq
+    LibNice::LibNice
+)
 
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 

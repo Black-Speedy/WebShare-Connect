@@ -2,10 +2,12 @@
  * @file receiver_main.c
  * @brief Main sender functionality.
  */
+#include <stdio.h>
 #include "WebShare-Connect.h"
 #include "sender.h"
 #include "sha512.h"
 #include "nice.h"
+#include <zmq.h>
 
 
 /**
@@ -64,7 +66,13 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
 
 	// Determine file size
 	fseek(fp, 0L, SEEK_END);
-	int64_t file_size = _ftelli64(fp);
+	int64_t file_size;
+
+	#ifdef WIN32
+		file_size = _ftelli64(fp);
+	#else
+		file_size = ftell(fp);
+	#endif
 	rewind(fp);
 	if (file_size < 1) {
 		printf("Error: File size error.\n");
