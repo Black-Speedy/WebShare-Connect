@@ -1,0 +1,4 @@
+libzmq3-dev
+libcmzq-dev
+libssl-dev
+libnice-dev

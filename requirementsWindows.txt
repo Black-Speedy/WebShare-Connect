@@ -1,4 +1,3 @@
 czmq
 openssl
-pkgconf
 libnice

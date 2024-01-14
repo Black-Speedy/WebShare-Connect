@@ -35,8 +35,6 @@ add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
 
 # Include the OpenSSL include directory
 include_directories(${OPENSSL_INCLUDE_DIR})
-include_directories(${ZMQ_INCLUDE_DIRS})
-message("ZMQ_INCLUDE_DIRS: ${ZMQ_INCLUDE_DIRS}")
 
 # Link against libraries
 target_link_libraries(WebShare-Connect PRIVATE 
