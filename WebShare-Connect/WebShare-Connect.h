@@ -7,7 +7,13 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include <ws2tcpip.h>
 #include <czmq.h>
-#include <OpenSSL/ssl.h>
 #include "common.h"
+//if on windows
+#ifdef _WIN32
+	#include <OpenSSL/ssl.h>
+//if on linux
+#endif
+#ifdef __linux__
+	#include <openssl/ssl.h>
+#endif

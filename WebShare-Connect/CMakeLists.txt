@@ -1,5 +1,15 @@
 ﻿cmake_minimum_required(VERSION 3.12)
-project(WebShare-Connect)
+project(WebShare-Connect LANGUAGES C VERSION 0.0.1)
+
+set(CMAKE_VERBOSE_MAKEFILE 1)
+
+if (MSVC)
+    # Use different flags for MSVC
+    set(CMAKE_C_FLAGS "/Wall /w14242 /W4")
+else()
+    # Use your original flags for other compilers
+    set(CMAKE_C_FLAGS "-Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef")
+endif()
 
 # Add include directories to your project.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
@@ -12,50 +22,46 @@ add_executable(WebShare-Connect
 
 # Add libraries
 add_library(sha512 "sha512.c" "sha512.h")
+# Disable all warnings for the sha512 library
+if (MSVC)
+    target_compile_options(sha512 PRIVATE /w)
+else()
+    target_compile_options(sha512 PRIVATE -w)
+endif()
+
 add_library(sender "sender.c" "sender.h")
 add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
 
-# Find packages
-find_package(czmq CONFIG REQUIRED)
-find_package(ZeroMQ CONFIG REQUIRED)
-find_package(OpenSSL REQUIRED)
-
-add_definitions(-DG_OS_WIN32)
-# Set include directories
-set(INCLUSIONS "${_VCPKG_INSTALLED_DIR}/x64-windows/include")
-set(LIBRARIES  "${_VCPKG_INSTALLED_DIR}/x64-windows/lib")
-
-set(GLIB_INCLUDE_DIR "${INCLUSIONS}/glib-2.0")
-set(GLIB_LIB_DIR "${LIBRARIES}/glib-2.0.lib")
-set(GLIB_CONF "${LIBRARIES}/glib-2.0/include")
-
-set(LIBNICE_INCLUDE_DIR "${INCLUSIONS}/nice")
-set(LIBNICE_LIB_DIR "${LIBRARIES}/nice.lib")
-
-# Include directories
-include_directories(${GLIB_INCLUDE_DIR}) 
-include_directories(${GLIB_LIB_DIR})
-include_directories(${GLIB_CONF})
-include_directories(${LIBNICE_INCLUDE_DIR})
+# Include the OpenSSL include directory
+include_directories(${OPENSSL_INCLUDE_DIR})
 
 # Link against libraries
 target_link_libraries(WebShare-Connect PRIVATE 
-    ${GLIB_LIB_DIR} # Link against the actual GLib library file
-    ${LIBNICE_LIB_DIR}
-    czmq 
-    libzmq 
-    sha512 
+    sha512
     sender 
     receiver 
     OpenSSL::SSL 
     OpenSSL::Crypto 
     removeQuotes
-)
+    LibNice::LibNice
+    )
 
 # Link libraries to sender and receiver targets
-target_link_libraries(sender PRIVATE czmq libzmq sha512 OpenSSL::SSL OpenSSL::Crypto)
-target_link_libraries(receiver PRIVATE czmq)
+target_link_libraries(sender PRIVATE 
+    czmq 
+    libzmq
+    sha512 
+    OpenSSL::SSL 
+    OpenSSL::Crypto
+    LibNice::LibNice
+)
+
+target_link_libraries(receiver PRIVATE 
+    czmq
+    libzmq
+    LibNice::LibNice
+)
 
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
