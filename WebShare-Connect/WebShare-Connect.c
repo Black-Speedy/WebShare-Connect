@@ -24,7 +24,6 @@
   */
 int main(int argc, char const* argv[])
 {
-    printf("How many arguments: %d\n", argc);
     char* user_argv[5]; // Array of arguments to pass to sender_main or receiver_main
     if (5 == argc) {
         printf("IM HERE\n");
@@ -84,7 +83,6 @@ int main(int argc, char const* argv[])
             //    printf("Invalid number of threads. Please enter a number between 1 and %d.\n", MAX_THREADS);
             //    error = 0;
             //}
-        //}
         } while (error != 1);
 
         int c;
@@ -104,7 +102,7 @@ int main(int argc, char const* argv[])
             user_argv[4] = strdup(newFilePath);
         }
         else user_argv[4] = strdup(filePath);
-
+	}
     if (strcmp(user_argv[1], "sender") == 0 || strcmp(user_argv[1], "server") == 0) {
         return sender_main(argc - 1, user_argv + 1);
     }
