@@ -1,3 +1,5 @@
+#This and FindGLIB.cmake are taken from https://github.com/chadnickbok/librtcdcpp/blob/master/cmake/Modules/FindLibNice.cmake and 
+# https://github.com/chadnickbok/librtcdcpp/blob/master/cmake/Modules/FindGLIB.cmake
 if (NOT TARGET LibNice::LibNice)
     find_package(PkgConfig)
     pkg_check_modules(PC_LIBNICE nice)
@@ -12,9 +14,6 @@ if (NOT TARGET LibNice::LibNice)
     find_library(LIBNICE_LIBRARY NAMES nice libnice
             HINTS ${PC_LIBNICE_LIBDIR} ${PC_LIBNICE_LIBRARY_DIRS})
 
-    message("PC_LIBNICE_INCLUDEDIR: ${PC_LIBNICE_INCLUDEDIR}")
-    message("PC_LIBNICE_INCLUDE_DIRS: ${PC_LIBNICE_INCLUDE_DIRS}")
-
     include(FindPackageHandleStandardArgs)
     find_package_handle_standard_args(LibNice DEFAULT_MSG
             LIBNICE_LIBRARY LIBNICE_INCLUDE_DIR)
@@ -22,9 +21,6 @@ if (NOT TARGET LibNice::LibNice)
 
     set(LIBNICE_LIBRARIES ${LIBNICE_LIBRARY})
     set(LIBNICE_INCLUDE_DIRS "${LIBNICE_INCLUDE_DIR}/nice")
-
-    message("LIBNICE_INCLUDE_DIRs: ${LIBNICE_INCLUDE_DIRS}")
-    message("LIBNICE_LIBRARY: ${LIBNICE_LIBRARY}")
 
     find_package(GLIB REQUIRED COMPONENTS gio gobject gmodule gthread)
 
