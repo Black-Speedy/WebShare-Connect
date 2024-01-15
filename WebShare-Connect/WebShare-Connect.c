@@ -41,7 +41,7 @@ int main(int argc, char const* argv[])
         char threads[4];
         char filePath[256];
         do {
-            printf("Please enter either 'sender / server' or 'receiver / client': ");
+            printf("Please enter either 'sender' / 'server' or 'receiver' / 'client': ");
             error = scanf("%9s", mode);
             if (error != 1) {
                 printf("Input error. Please try again.\n");
