@@ -9,6 +9,11 @@
 #include "removeQuotes.h"
 #include <nice.h>
 
+#ifndef MAX_THREADS
+#define MAX_THREADS 100
+#endif // !MAX_THREADS
+
+
  /**
   * @brief The main function. This is where the program starts.
   *
@@ -35,10 +40,10 @@ int main(int argc, char const* argv[])
     //if there are no arguments then ask for them
     // else if (argc < 2) {
     else {
-        char mode[10];
+        char mode[10] = { 0 };
         int error;
-        char port[6];
-        char threads[4];
+        char port[6] = { 0 };
+        char threads[4] = { 0 };
         char filePath[256];
         do {
             printf("Please enter either 'sender' / 'server' or 'receiver' / 'client': ");
@@ -61,12 +66,10 @@ int main(int argc, char const* argv[])
                 printf("Input error. Please try again.\n");
                 error = scanf("%*[^\n]"); // Clear the input buffer
             }
-            else {
-                int portNum = atoi(port);
-                if (portNum < 0 || portNum > 65535) {
-                    printf("Invalid port number. Please enter a number between 0 and 65535: ");
-                    error = 0;
-                }
+            int portNum = atoi(port);
+            if ((portNum < 1) != (portNum > (pow(2, 16) - 1))) {
+                printf("Invalid number of threads. Please enter a number between 1 and %d.\n", MAX_THREADS);
+                error = 0;
             }
         } while (error != 1);
 
@@ -77,12 +80,11 @@ int main(int argc, char const* argv[])
                 printf("Input error. Please try again.\n");
                 error = scanf("%*[^\n]"); // Clear the input buffer
             }
-            //else {
             int threadNum = atoi(threads);
-            //if (threadNum < 1 || threadNum > MAX_THREADS) {
-            //    printf("Invalid number of threads. Please enter a number between 1 and %d.\n", MAX_THREADS);
-            //    error = 0;
-            //}
+            if ((threadNum < 1) != (threadNum > MAX_THREADS)) {
+                printf("Invalid number of threads. Please enter a number between 1 and %d.\n", MAX_THREADS);
+                error = 0;
+            }
         } while (error != 1);
 
         int c;
