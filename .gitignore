@@ -53,6 +53,7 @@ dkms.conf
 
 
 .vs/
+.vscode/
 out/
 build/
 buildWindows/
