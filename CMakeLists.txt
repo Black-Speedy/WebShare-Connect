@@ -3,7 +3,7 @@
 if(WIN32)
     # Set the vcpkg toolchain file if vcpkg is being used
     if(DEFINED ENV{VCPKG_ROOT} AND NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-      set(CMAKE_TOOLCHAIN_FILE "-DCMAKE_TOOLCHAIN_FILE=${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+      set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
           CACHE STRING "")
     endif()
 endif()
