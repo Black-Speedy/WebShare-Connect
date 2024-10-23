@@ -37,8 +37,6 @@ int main(int argc, char const* argv[])
             user_argv[i] = strdup(argv[i]);
         }
     }
-    //if there are no arguments then ask for them
-    // else if (argc < 2) {
     else {
         char mode[10] = { 0 };
         int error;
