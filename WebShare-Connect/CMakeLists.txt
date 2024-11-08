@@ -32,6 +32,7 @@ endif()
 add_library(sender "sender.c" "sender.h")
 add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
+add_library(terminalProgressBar "terminalProgressBar.c" "terminalProgressBar.h")
 
 # Include the OpenSSL include directory
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -45,6 +46,7 @@ target_link_libraries(WebShare-Connect PRIVATE
     OpenSSL::Crypto 
     removeQuotes
     LibNice::LibNice
+    terminalProgressBar
     )
 
 # Link libraries to sender and receiver targets
@@ -55,13 +57,17 @@ target_link_libraries(sender PRIVATE
     OpenSSL::SSL 
     OpenSSL::Crypto
     LibNice::LibNice
+    terminalProgressBar
 )
 
 target_link_libraries(receiver PRIVATE 
     czmq
     libzmq
     LibNice::LibNice
+    terminalProgressBar
 )
+
+target_link_libraries(terminalProgressBar PRIVATE)
 
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 

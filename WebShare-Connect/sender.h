@@ -14,17 +14,20 @@
 #define CHUNK_SIZE_35GB   ((1 << 21) + (1 << 20))   /**< Chunk size for  35 GB:   3 MiB */
 #define CHUNK_SIZE_50GB   (1 << 22)                 /**< Chunk size for  50 GB:   4 MiB */
 
+#define CHUNK_SIZES {CHUNK_SIZE_1MB, CHUNK_SIZE_100MB, CHUNK_SIZE_1GB, CHUNK_SIZE_10GB, CHUNK_SIZE_20GB, CHUNK_SIZE_35GB, CHUNK_SIZE_50GB}
+
  /**
   * @brief File sizes in bytes for different capacities.
   */
-#define FILE_SIZE_1MB		        1 * 1000 * 1000LL	/**<   1 MB in bytes */
+#define FILE_SIZE_1MB		          1 * 1000 * 1000LL	/**<   1 MB in bytes */
 #define FILE_SIZE_100MB		      100 * 1000 * 1000LL	/**< 100 MB in bytes */
-#define FILE_SIZE_1GB		 1 * 1000 * 1000 * 1000LL	/**<   1 GB in bytes */
+#define FILE_SIZE_1GB		   1 * 1000 * 1000 * 1000LL	/**<   1 GB in bytes */
 #define FILE_SIZE_10GB		10 * 1000 * 1000 * 1000LL	/**<  10 GB in bytes */
 #define FILE_SIZE_20GB		20 * 1000 * 1000 * 1000LL	/**<  20 GB in bytes */
 #define FILE_SIZE_35GB		35 * 1000 * 1000 * 1000LL	/**<  35 GB in bytes */
 #define FILE_SIZE_50GB		50 * 1000 * 1000 * 1000LL	/**<  50 GB in bytes */
 
+#define FILE_SIZES {FILE_SIZE_1MB, FILE_SIZE_100MB, FILE_SIZE_1GB, FILE_SIZE_10GB, FILE_SIZE_20GB, FILE_SIZE_35GB, FILE_SIZE_50GB}
 
 /**
  * @brief Sets up a sender socket.

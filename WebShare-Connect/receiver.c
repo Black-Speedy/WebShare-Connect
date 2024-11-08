@@ -7,6 +7,7 @@
 #include "receiver.h"
 #include "sha512.h"
 #include "nice.h"
+#include "terminalProgressBar.h"
 
  /**
   * @brief Struct representing file information.
@@ -37,7 +38,7 @@ zsock_t* receiver(void* context, const char* port, int threads)
     zsock_t* receiver_sock = zsock_new(ZMQ_PAIR);
     assert(receiver_sock);
 
-    int rc = zsock_connect(receiver_sock, "tcp://2.tcp.eu.ngrok.io:%s", port); // change to to sender ip when running on different machines
+    int rc = zsock_connect(receiver_sock, "192.168.0.69:%s", port); // change to to sender ip when running on different machines
     assert(rc != -1);
 
     zsock_set_rcvtimeo(receiver_sock, 2000); // 2s timeout for recv
@@ -118,12 +119,15 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
             fprintf(stderr, "Error writing to file: expected %d bytes, wrote %zu bytes\n", size, written);
             break;
         }
+
+        received_size += size;
+        current_chunk++;
+        int percentage = (int)((received_size * 100) / file_size);
+        printProgressBar(percentage);
+
         if (zstr_send(receiver_sock, "ACK") == -1) {
             fprintf(stderr, "Error sending acknowledgment: %s\n", zmq_strerror(errno));
         }
-        received_size += size;
-        current_chunk++;
-        printf("Chunk %d/%d received. Size: %d bytes.\n", current_chunk, chunk_count, size);
     }
     free(buffer);
     fclose(fp);
