@@ -31,7 +31,6 @@ int main(int argc, char const* argv[])
 {
     char* user_argv[5]; // Array of arguments to pass to sender_main or receiver_main
     if (5 == argc) {
-        printf("IM HERE\n");
         // set user_argv to argv
         for (int i = 0; i < argc; i++) {
             user_argv[i] = strdup(argv[i]);

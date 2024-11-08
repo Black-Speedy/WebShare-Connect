@@ -27,3 +27,7 @@ make
 sudo make install
 
 ```
+# Build the project on Linux
+```
+cmake -B compiled/buildLinux/ . && cmake --build compiled/buildLinux
+```
