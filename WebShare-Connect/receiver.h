@@ -37,7 +37,7 @@
  * @param threads The number of threads to use.
  * @return A pointer to the created receiver socket.
  */
-zsock_t* receiver(void* context, const char* port, int threads);
+zsock_t* receiver(void* context, const char* ip_address, const char* port, int threads);
 
 /**
  * @brief Receives a file via the receiver socket.

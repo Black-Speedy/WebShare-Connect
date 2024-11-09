@@ -153,18 +153,20 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
 	int current_chunk = 0;
 	printf("  Total chunks to send: %lld\n", chunk_count);
 
+	int is_complete = 0;
 	while (1) {
 		memset(buffer, 0, chunk_size);
 		size_t bytesRead = fread(buffer, 1, chunk_size, fp);
 		if (bytesRead == 0) {
 			if (ferror(fp)) perror("Error reading file");
+			is_complete = 1; // Mark as complete if finished reading
 			break;
 		}
 		zsock_send(serv_sock, "b", buffer, bytesRead);
 
 		current_chunk++;
 		int percentage = (int)((current_chunk * 100) / chunk_count);
-		printProgressBar(percentage);
+		printProgressBar(percentage, current_chunk, chunk_count, is_complete);
 
 		char* ack = zstr_recv(serv_sock);
 		if (!ack) {
@@ -178,6 +180,10 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
 		}
 		free(ack);
 	}
+
+	// Final display with completion
+	printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
+	printf("\n"); // Move to new line after completion
 
 	free(buffer);
 	fclose(fp);

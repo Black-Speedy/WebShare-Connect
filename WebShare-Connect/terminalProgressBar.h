@@ -5,12 +5,7 @@
 #else
 #include <unistd.h>
 #endif
-// terminalProgressBar.h
-#ifndef TERMINAL_PROGRESS_BAR_H
-#define TERMINAL_PROGRESS_BAR_H
 
-void printProgressBar(int percentage);
-
-void sleep_ms(int milliseconds);
-
-#endif // TERMINAL_PROGRESS_BAR_H
+void applyStatusColor(int is_complete);
+void resetConsoleColor();
+void printProgressBar(int percentage, int current_chunk, int total_chunks, int is_complete);

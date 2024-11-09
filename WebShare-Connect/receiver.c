@@ -29,7 +29,7 @@ typedef struct {
  * @param threads The number of threads to use.
  * @return A pointer to the created receiver socket.
  */
-zsock_t* receiver(void* context, const char* port, int threads)
+zsock_t* receiver(void* context, const char* ip_address, const char* port, int threads)
 {
     int io_threads = threads;
     zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
@@ -38,7 +38,7 @@ zsock_t* receiver(void* context, const char* port, int threads)
     zsock_t* receiver_sock = zsock_new(ZMQ_PAIR);
     assert(receiver_sock);
 
-    int rc = zsock_connect(receiver_sock, "192.168.0.69:%s", port); // change to to sender ip when running on different machines
+    int rc = zsock_connect(receiver_sock, "tcp://%s:%s", ip_address, port); // change to to sender ip when running on different machines
     assert(rc != -1);
 
     zsock_set_rcvtimeo(receiver_sock, 2000); // 2s timeout for recv
@@ -107,6 +107,7 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
     int chunk_count = (file_size + chunk_size - 1) / chunk_size;
     int current_chunk = 0;
 
+    int is_complete = 0;
     while (received_size < file_size) {
         int size = zmq_recv(zsock_resolve(receiver_sock), buffer, chunk_size, 0);
         if (size == -1) {
@@ -123,12 +124,16 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
         received_size += size;
         current_chunk++;
         int percentage = (int)((received_size * 100) / file_size);
-        printProgressBar(percentage);
+        printProgressBar(percentage, current_chunk, chunk_count, is_complete);
 
         if (zstr_send(receiver_sock, "ACK") == -1) {
             fprintf(stderr, "Error sending acknowledgment: %s\n", zmq_strerror(errno));
         }
     }
+
+    // Final display with completion
+    printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
+    printf("\n"); // Move to new line after completion
     free(buffer);
     fclose(fp);
 
@@ -188,8 +193,11 @@ int receiver_main(int argc, char const* argv[]) {
     void* context = zmq_ctx_new();
     assert(context);
 
+
+    //temp ip address should be in arguments
+    const char* ip_address = "192.168.0.69";
     // Create and bind the PULL socket
-    zsock_t* receiver_sock = receiver(context, port, threads);
+    zsock_t* receiver_sock = receiver(context, ip_address, port, threads);
     assert(receiver_sock);
 
     // Receive file
