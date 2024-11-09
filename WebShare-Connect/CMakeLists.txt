@@ -32,6 +32,7 @@ endif()
 add_library(sender "sender.c" "sender.h")
 add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
+add_library(fileChunks "Include/fileChunks.c" "Include/fileChunks.h")
 
 # Include the OpenSSL include directory
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -45,6 +46,7 @@ target_link_libraries(WebShare-Connect PRIVATE
     OpenSSL::Crypto 
     removeQuotes
     LibNice::LibNice
+    fileChunks
     )
 
 # Link libraries to sender and receiver targets
@@ -55,12 +57,14 @@ target_link_libraries(sender PRIVATE
     OpenSSL::SSL 
     OpenSSL::Crypto
     LibNice::LibNice
+    fileChunks
 )
 
 target_link_libraries(receiver PRIVATE 
     czmq
     libzmq
     LibNice::LibNice
+    fileChunks
 )
 
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)

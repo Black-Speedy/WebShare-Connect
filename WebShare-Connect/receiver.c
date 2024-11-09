@@ -28,19 +28,23 @@ typedef struct {
  * @param threads The number of threads to use.
  * @return A pointer to the created receiver socket.
  */
-zsock_t* receiver(void* context, const char* port, int threads)
+zsock_t* receiver(void* context, const char* ip_address, const char* port, int threads)
 {
+    //string ip adress
     int io_threads = threads;
     zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
     assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
 
+    printf("Creating receiver socket in receiver()\n");
     zsock_t* receiver_sock = zsock_new(ZMQ_PAIR);
     assert(receiver_sock);
+    printf("Assert 2\n");
 
-    int rc = zsock_connect(receiver_sock, "tcp://2.tcp.eu.ngrok.io:%s", port); // change to to sender ip when running on different machines
+    int rc = zsock_connect(receiver_sock, "tcp://%s:%s", ip_address, port); // change to to sender ip when running on different machines
     assert(rc != -1);
+    printf("Assert 3\n");
 
-    zsock_set_rcvtimeo(receiver_sock, 2000); // 2s timeout for recv
+    zsock_set_rcvtimeo(receiver_sock, 3000); // 2s timeout for recv
 
     return receiver_sock;
 }
@@ -62,6 +66,7 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
     byte* header_buf = NULL;
 
     // Receive the header
+    printf("Receiving header");
     int rc = zsock_recv(receiver_sock, "b", &header_buf, &header_size);
     if (rc == -1) {
         fprintf(stderr, "Error: Failed to receive header.\n");
@@ -175,6 +180,8 @@ int receiver_main(int argc, char const* argv[]) {
         return 1;
     }
 
+    // temporary ip address should come in argument
+    const char* ip_address = "192.168.0.69";
     const char* port = argv[1];
     int threads = atoi(argv[2]);
     const char* output_file_path = argv[3];
@@ -183,10 +190,13 @@ int receiver_main(int argc, char const* argv[]) {
 
     void* context = zmq_ctx_new();
     assert(context);
+    printf("Assert 1\n");
 
     // Create and bind the PULL socket
-    zsock_t* receiver_sock = receiver(context, port, threads);
+    printf("Creating receiver socket\n");
+    zsock_t* receiver_sock = receiver(context, ip_address, port, threads);
     assert(receiver_sock);
+    printf("Assert 4\n");
 
     // Receive file
     receiver_receive(receiver_sock, output_file_path);

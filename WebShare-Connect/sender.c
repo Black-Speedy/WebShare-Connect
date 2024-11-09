@@ -82,45 +82,8 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
 
 	printf("  File size: %lld bytes\n", file_size);
 
-	int chunk_size;
-
-	if (file_size == 0)
-	{
-		printf("File is empty\n");
-		return;
-	}
-	else if (file_size <= FILE_SIZE_1MB) 
-	{
-		chunk_size = CHUNK_SIZE_1MB;
-	}
-	else if (file_size <= FILE_SIZE_100MB) 
-	{
-		chunk_size = CHUNK_SIZE_100MB;
-	}
-	else if (file_size <= FILE_SIZE_1GB)
-	{
-		chunk_size = CHUNK_SIZE_1GB;
-	}
-	else if (file_size <= FILE_SIZE_10GB)
-	{
-		chunk_size = CHUNK_SIZE_10GB;
-	}
-	else if (file_size <= FILE_SIZE_20GB)
-	{
-		chunk_size = CHUNK_SIZE_20GB;
-	}
-	else if (file_size <= FILE_SIZE_35GB)
-	{
-		chunk_size = CHUNK_SIZE_35GB;
-	}
-	else if (file_size <= FILE_SIZE_50GB)
-	{
-		chunk_size = CHUNK_SIZE_50GB;
-	}
-	else {
-		// 2^24 = 16 MiB
-		chunk_size = 1 << 24;
-	}
+	// Use get_chunk_size function from common.h
+	int chunk_size = get_chunk_size(file_size);
 
 	printf("  Chunk size: %d bytes\n", chunk_size);
 
@@ -132,6 +95,8 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
 	header.file_size = file_size;
 	header.chunk_size = chunk_size;
 	memcpy(header.hash, hash, SHA512_DIGEST_LENGTH);
+
+	printf("  Chunk size: %d bytes\n", chunk_size);
 
 	// Convert hash to hex string
 	char hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
