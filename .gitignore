@@ -55,6 +55,7 @@ dkms.conf
 .vs/
 .vscode/
 out/
+compiled/
 build/
 buildWindows/
 buildLinux/

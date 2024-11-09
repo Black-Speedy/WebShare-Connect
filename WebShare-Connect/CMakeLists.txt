@@ -39,6 +39,7 @@ add_library(sender "sender.c" "sender.h")
 add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
 add_library(fileChunks "Include/fileChunks.c" "Include/fileChunks.h")
+add_library(terminalProgressBar "terminalProgressBar.c" "terminalProgressBar.h")
 
 # Include the OpenSSL include directory
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -53,6 +54,7 @@ target_link_libraries(WebShare-Connect PRIVATE
     removeQuotes
     LibNice::LibNice
     fileChunks
+    terminalProgressBar
     )
 
 # Link libraries to sender and receiver targets
@@ -64,6 +66,7 @@ target_link_libraries(sender PRIVATE
     OpenSSL::Crypto
     LibNice::LibNice
     fileChunks
+    terminalProgressBar
 )
 
 target_link_libraries(receiver PRIVATE 
@@ -71,7 +74,10 @@ target_link_libraries(receiver PRIVATE
     libzmq
     LibNice::LibNice
     fileChunks
+    terminalProgressBar
 )
+
+target_link_libraries(terminalProgressBar PRIVATE)
 
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
