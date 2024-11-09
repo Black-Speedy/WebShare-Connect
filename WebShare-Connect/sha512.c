@@ -25,7 +25,9 @@ int compute_sha512(const char* path, unsigned char output[SHA512_DIGEST_LENGTH])
 
     // Update SHA512 context
     int bytesRead;
-    while ((bytesRead = fread(buffer, 1, bufSize, file))) {
+    while (1) {
+        bytesRead = fread(buffer, 1, bufSize, file);
+        if (bytesRead == 0) break;
         SHA512_Update(&sha512, buffer, bytesRead);
     }
     rewind(file); // Reset file pointer (not sure if this is necessary)

@@ -3,13 +3,19 @@ project(WebShare-Connect LANGUAGES C VERSION 0.0.1)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
-if (MSVC)
-    # Use different flags for MSVC
-    set(CMAKE_C_FLAGS "/Wall /w14242 /W4")
-else()
-    # Use your original flags for other compilers
-    set(CMAKE_C_FLAGS "-Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef")
+if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
+  # Suppress warnings related to inline expansions
+  set(CMAKE_C_FLAGS "/wd4710 /wd4711")
 endif()
+
+if (MSVC)
+  # Use different flags for MSVC
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /Wall /w14242 /W4")
+else()
+  # Use your original flags for other compilers
+  set(CMAKE_C_FLAGS "-Wall -Wextra -Wconversion -Wunreachable-code -Wshadow -Wundef")
+endif()
+
 
 # Add include directories to your project.
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
