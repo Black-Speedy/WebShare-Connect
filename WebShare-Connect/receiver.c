@@ -7,6 +7,7 @@
 #include "receiver.h"
 #include "sha512.h"
 #include "nice.h"
+#include "terminalProgressBar.h"
 
  /**
   * @brief Struct representing file information.
@@ -111,6 +112,7 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
     int chunk_count = (file_size + chunk_size - 1) / chunk_size;
     int current_chunk = 0;
 
+    int is_complete = 0;
     while (received_size < file_size) {
         int size = zmq_recv(zsock_resolve(receiver_sock), buffer, chunk_size, 0);
         if (size == -1) {
@@ -123,13 +125,20 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
             fprintf(stderr, "Error writing to file: expected %d bytes, wrote %zu bytes\n", size, written);
             break;
         }
+
+        received_size += size;
+        current_chunk++;
+        int percentage = (int)((received_size * 100) / file_size);
+        printProgressBar(percentage, current_chunk, chunk_count, is_complete);
+
         if (zstr_send(receiver_sock, "ACK") == -1) {
             fprintf(stderr, "Error sending acknowledgment: %s\n", zmq_strerror(errno));
         }
-        received_size += size;
-        current_chunk++;
-        printf("Chunk %d/%d received. Size: %d bytes.\n", current_chunk, chunk_count, size);
     }
+
+    // Final display with completion
+    printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
+    printf("\n"); // Move to new line after completion
     free(buffer);
     fclose(fp);
 
@@ -192,7 +201,6 @@ int receiver_main(int argc, char const* argv[]) {
     assert(context);
     printf("Assert 1\n");
 
-    // Create and bind the PULL socket
     printf("Creating receiver socket\n");
     zsock_t* receiver_sock = receiver(context, ip_address, port, threads);
     assert(receiver_sock);
