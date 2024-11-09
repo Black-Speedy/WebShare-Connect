@@ -190,7 +190,7 @@ int receiver_main(int argc, char const* argv[]) {
     }
 
     // temporary ip address should come in argument
-    const char* ip_address = "192.168.0.69";
+    const char* ip_address = "matinisthymaster.asuscomm.com";
     const char* port = argv[1];
     int threads = atoi(argv[2]);
     const char* output_file_path = argv[3];
