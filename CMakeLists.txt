@@ -46,5 +46,12 @@ endif()
 # Include sub-projects.
 add_subdirectory("WebShare-Connect")
 
-# Link libraries to your project (replace 'your_target_name' with the actual target name)
-# target_link_libraries(your_target_name PRIVATE czmq ZeroMQ::ZeroMQ)
+# Set the path for your custom libraries
+set(LIBRARY "${CMAKE_SOURCE_DIR}/WebShare-Connect/Include/lib")
+message("LIBRARY: ${LIBRARY}")
+
+# Add the pthread library files to the target
+if (WIN32)
+    set(PTHREAD_LIB "${LIBRARY}/pthreadVC3.lib")
+    message("PTHREAD_LIB: ${PTHREAD_LIB}")
+endif()
