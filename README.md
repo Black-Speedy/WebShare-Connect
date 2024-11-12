@@ -25,7 +25,7 @@ make
 sudo make install
 ```
 ## To build czmq follow the steps:
-If you are inside the **WebShare-Connect/** directory
+If you are inside the outmost **WebShare-Connect/** directory
 ```
 git clone https://github.com/zeromq/czmq.git
 cd czmq
@@ -43,7 +43,15 @@ cmake -B compiled/build/ . && cmake --build compiled/build
 ## Usage
 There are two modes of operation.
 1. The first mode is where you give the input when calling the compiled program such as:
-```
-WebShare-Connect <operation_mode> <port> <threds> <filepath>
-```
+    1. Linux:
+        ```
+        ./WebShare-Connect <operation_mode> <port> <threds> <filepath>
+        ```
+    2. On Windows:
+        ```
+        ./WebShare-Connect.exe <operation_mode> <port> <threds> <filepath>
+        ```
+
 2. The second mode is where you open the program and it guides you through the input.
+
+The two modes of operationifg that are supported are <em>sender</em> / <em>server</em> and <em>receiver</em> / <em>client</em>

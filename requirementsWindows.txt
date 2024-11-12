@@ -1,3 +1,4 @@
 czmq
 openssl
 libnice
+libsodium
