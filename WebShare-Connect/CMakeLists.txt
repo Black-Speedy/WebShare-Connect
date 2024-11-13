@@ -40,8 +40,8 @@ add_library(receiver "receiver.c" "receiver.h")
 add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
 add_library(fileChunks "Include/fileChunks.c" "Include/fileChunks.h")
 add_library(terminalProgressBar "terminalProgressBar.c" "terminalProgressBar.h")
+add_library(workerqueue "workerqueue.c" "workerqueue.h")
 
-# Include the OpenSSL include directory
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 # Link against libraries
@@ -55,6 +55,9 @@ target_link_libraries(WebShare-Connect PRIVATE
     LibNice::LibNice
     fileChunks
     terminalProgressBar
+    workerqueue
+    unofficial-sodium::sodium
+    "${PTHREAD_LIB}"
     )
 
 # Link libraries to sender and receiver targets
@@ -67,6 +70,7 @@ target_link_libraries(sender PRIVATE
     LibNice::LibNice
     fileChunks
     terminalProgressBar
+    unofficial-sodium::sodium
 )
 
 target_link_libraries(receiver PRIVATE 
@@ -75,13 +79,12 @@ target_link_libraries(receiver PRIVATE
     LibNice::LibNice
     fileChunks
     terminalProgressBar
+    unofficial-sodium::sodium
 )
 
 target_link_libraries(terminalProgressBar PRIVATE)
-
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
+target_link_libraries(workerqueue PRIVATE "${PTHREAD_LIB}")
 
-# Set C standard
+
 set_property(TARGET WebShare-Connect PROPERTY C_STANDARD 11)
-
-# TODO: Add tests and install targets if needed.

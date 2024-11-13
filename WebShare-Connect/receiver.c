@@ -8,6 +8,7 @@
 #include "sha512.h"
 #include "nice.h"
 #include "terminalProgressBar.h"
+#include <sodium.h>
 
  /**
   * @brief Struct representing file information.

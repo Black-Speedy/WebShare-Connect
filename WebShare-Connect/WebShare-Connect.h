@@ -8,6 +8,7 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <czmq.h>
+#include <sodium.h>
 #include "common.h"
 //if on windows
 #ifdef _WIN32

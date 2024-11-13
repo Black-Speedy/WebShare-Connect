@@ -8,6 +8,10 @@ if(WIN32)
     endif()
 endif()
 
+# Set the path for your custom libraries
+set(LIBRARY "${CMAKE_SOURCE_DIR}/WebShare-Connect/Include/lib")
+message("LIBRARY: ${LIBRARY}")
+
 # Enable Hot Reload for MSVC compilers if supported.
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
@@ -25,33 +29,37 @@ if(ZeroMQ_FOUND)
     message("ZeroMQ Found: TRUE")
     message("ZeroMq Version: ${ZeroMQ_VERSION}")
 endif()
+
 message("Finding library czmq")
 find_package(czmq CONFIG REQUIRED)
 if(czmq_FOUND)
 	message("czmq Found: TRUE")
 	message("czmq Version: ${czmq_VERSION}")
 endif()
+
 message("Finding library OpenSSL")
 find_package(OpenSSL REQUIRED)
 if(OPENSSL_FOUND)
 	message("OPENSSL Found: " ${OPENSSL_FOUND})
 	message("OPENSSL Version: ${OPENSSL_VERSION}")
 endif()
+
 message("Finding library LibNice")
 find_package(LibNice REQUIRED)
 if(LibNice_FOUND)
     message("LibNice Found: " ${LibNice_FOUND})
     message("LibNice Version: ${LibNice_VERSION}")
 endif()
+
+message("Finding library Sodium")
+find_package(unofficial-sodium CONFIG REQUIRED)
+if(unofficial-sodium_FOUND)
+    message("\tSodium Found: " ${unofficial-sodium_FOUND})
+    message("\tSodium Version: ${unofficial-sodium_VERSION}")
+endif()
+
+# Set the pthread library file path
+set(PTHREAD_LIB "${LIBRARY}/pthreadVC3.lib")
+
 # Include sub-projects.
 add_subdirectory("WebShare-Connect")
-
-# Set the path for your custom libraries
-set(LIBRARY "${CMAKE_SOURCE_DIR}/WebShare-Connect/Include/lib")
-message("LIBRARY: ${LIBRARY}")
-
-# Add the pthread library files to the target
-if (WIN32)
-    set(PTHREAD_LIB "${LIBRARY}/pthreadVC3.lib")
-    message("PTHREAD_LIB: ${PTHREAD_LIB}")
-endif()

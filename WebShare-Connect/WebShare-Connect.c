@@ -8,6 +8,7 @@
 #include "receiver.h"
 #include "removeQuotes.h"
 #include <nice.h>
+#include <sodium.h>
 
 #ifndef MAX_THREADS
 #define MAX_THREADS 100
@@ -29,6 +30,11 @@
   */
 int main(int argc, char const* argv[])
 {
+    // initialize sodium
+    if (sodium_init() == -1) {
+        fprintf(stderr, "Error initializing libsodium\n");
+        return 1;
+    }
     char* user_argv[5]; // Array of arguments to pass to sender_main or receiver_main
     if (5 == argc) {
         // set user_argv to argv

@@ -3,14 +3,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include <openssl/dh.h>
-#include <openssl/engine.h>
-#include <openssl/bn.h>
-#include <openssl/err.h>
 #include <pthread.h>
-
-
-
 
 /*
  * add macros and function declarations which should be

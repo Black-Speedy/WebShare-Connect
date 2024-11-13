@@ -8,6 +8,7 @@
 #include "sha512.h"
 #include "nice.h"
 #include <zmq.h>
+#include <sodium.h>
 
 
 /**
