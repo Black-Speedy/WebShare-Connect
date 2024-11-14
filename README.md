@@ -54,4 +54,4 @@ There are two modes of operation.
 
 2. The second mode is where you open the program and it guides you through the input.
 
-The two modes of operationifg that are supported are <em>sender</em> / <em>server</em> and <em>receiver</em> / <em>client</em>
+The two modes of operation modes that are supported are <em>sender</em> / <em>server</em> and <em>receiver</em> / <em>client</em>
