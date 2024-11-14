@@ -45,11 +45,11 @@ There are two modes of operation.
 1. The first mode is where you give the input when calling the compiled program such as:
     1. Linux:
         ```
-        ./WebShare-Connect <operation_mode> <port> <threds> <filepath>
+        ./WebShare-Connect <operation_mode> <port> <threads> <filepath>
         ```
     2. On Windows:
         ```
-        ./WebShare-Connect.exe <operation_mode> <port> <threds> <filepath>
+        ./WebShare-Connect.exe <operation_mode> <port> <threads> <filepath>
         ```
 
 2. The second mode is where you open the program and it guides you through the input.
