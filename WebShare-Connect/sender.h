@@ -6,6 +6,11 @@
 #include "common.h"
 #include "fileChunks.h"
 
+
+unsigned char key[crypto_secretbox_KEYBYTES];
+unsigned char nonce[crypto_aead_xchacha20poly1305_ietf_NPUBBYTES]; 
+unsigned char additional_bytes[crypto_aead_xchacha20poly1305_ietf_ABYTES]; 
+
 /**
  * @brief Sets up a sender socket.
  *

@@ -8,7 +8,6 @@
 #include "receiver.h"
 #include "removeQuotes.h"
 #include <nice.h>
-#include <sodium.h>
 
 #ifndef MAX_THREADS
 #define MAX_THREADS 100
@@ -70,7 +69,7 @@ int main(int argc, char const* argv[])
                 error = scanf("%*[^\n]"); // Clear the input buffer
             }
             int portNum = atoi(port);
-            if ((portNum < 1) != (portNum > (pow(2, 16) - 1))) {
+            if ((portNum < 1) != (portNum > (pow(2, 16) - 1))) { 
                 printf("Invalid number of threads. Please enter a number between 1 and %d.\n", MAX_THREADS);
                 error = 0;
             }

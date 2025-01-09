@@ -17,9 +17,9 @@
  /**
   * @brief File sizes in bytes for different capacities.
   */
-#define FILE_SIZE_1MB		        1 * 1000 * 1000LL	/**<   1 MB in bytes */
+#define FILE_SIZE_1MB		          1 * 1000 * 1000LL	/**<   1 MB in bytes */
 #define FILE_SIZE_100MB		      100 * 1000 * 1000LL	/**< 100 MB in bytes */
-#define FILE_SIZE_1GB		 1 * 1000 * 1000 * 1000LL	/**<   1 GB in bytes */
+#define FILE_SIZE_1GB		   1 * 1000 * 1000 * 1000LL	/**<   1 GB in bytes */
 #define FILE_SIZE_10GB		10 * 1000 * 1000 * 1000LL	/**<  10 GB in bytes */
 #define FILE_SIZE_20GB		20 * 1000 * 1000 * 1000LL	/**<  20 GB in bytes */
 #define FILE_SIZE_35GB		35 * 1000 * 1000 * 1000LL	/**<  35 GB in bytes */

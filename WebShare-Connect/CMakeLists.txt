@@ -56,8 +56,6 @@ target_link_libraries(WebShare-Connect PRIVATE
     fileChunks
     terminalProgressBar
     workerqueue
-    unofficial-sodium::sodium
-    "${PTHREAD_LIB}"
     )
 
 # Link libraries to sender and receiver targets
@@ -66,7 +64,6 @@ target_link_libraries(sender PRIVATE
     libzmq
     sha512 
     OpenSSL::SSL 
-    OpenSSL::Crypto
     LibNice::LibNice
     fileChunks
     terminalProgressBar
@@ -85,6 +82,5 @@ target_link_libraries(receiver PRIVATE
 target_link_libraries(terminalProgressBar PRIVATE)
 target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 target_link_libraries(workerqueue PRIVATE "${PTHREAD_LIB}")
-
 
 set_property(TARGET WebShare-Connect PROPERTY C_STANDARD 11)

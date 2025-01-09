@@ -22,6 +22,18 @@ typedef struct {
 } file_header_t;
 
 /**
+ * @brief Encrypts the symmetric key using the receiver's public key.
+ *
+ * @param key The symmetric key to be encrypted.
+ * @param receiver_public_key The receiver's public key.
+ * @param encrypted_key The output buffer for the encrypted key.
+ */
+int encrypt_symmetric_key(const unsigned char* key, const unsigned char* receiver_public_key,
+                          unsigned char* encrypted_key) {
+    return crypto_box_seal(encrypted_key, key, crypto_aead_xchacha20poly1305_ietf_KEYBYTES, receiver_public_key);
+}
+
+/**
  * @brief Sets up a sender socket.
  *
  * Initializes and binds a sender socket to the specified port.
@@ -58,6 +70,10 @@ zsock_t* sender(void* context, const char *port, int threads)
  */
 void sender_send(zsock_t* serv_sock, const char* file_path)
 {
+	// Generate key and nonce
+	randombytes_buf(key, sizeof(key));
+	randombytes_buf(nonce, sizeof(nonce));
+
 	// Open file
 	FILE* fp = fopen(file_path, "rb");
 	if (!fp) {
@@ -115,6 +131,14 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
 		return;
 	}
 
+	char* encrypted_chunk = (char*)malloc(chunk_size + additional_bytes);
+	if (!encrypted_chunk) {
+		printf("Error: Memory allocation failed.\n");
+		free(buffer); // free buffer from previous allocation
+		fclose(fp);
+		return;
+	}
+
 	int64_t chunk_count = file_size / (int64_t)chunk_size + (file_size % (int64_t)chunk_size != 0);
 	int current_chunk = 0;
 	printf("  Total chunks to send: %lld\n", chunk_count);
@@ -122,13 +146,32 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
 	int is_complete = 0;
 	while (1) {
 		memset(buffer, 0, chunk_size);
-		size_t bytesRead = fread(buffer, 1, chunk_size, fp);
-		if (bytesRead == 0) {
+		size_t bytes_read = fread(buffer, 1, chunk_size, fp);
+		if (bytes_read == 0) {
 			if (ferror(fp)) perror("Error reading file");
 			is_complete = 1; // Mark as complete if finished reading
 			break;
 		}
-		zsock_send(serv_sock, "b", buffer, bytesRead);
+
+		unsigned long long encrypted_len;
+		int result = crypto_aead_xchacha20poly1305_ietf_encrypt(
+				encrypted_chunk, 
+				&encrypted_len, // set to the length of the encrypted message
+				buffer, 
+				bytes_read,
+				NULL, 0,        // No additional data
+				NULL,           // No secret nonce
+				nonce, key);
+
+		if (result != 0) {
+			fprintf(stderr, "Encryption failed\n");
+			free(buffer);
+			free(encrypted_chunk);
+			break;
+		}
+
+		// send encrypted chunk
+		zsock_send(serv_sock, "b", encrypted_chunk, encrypted_len);
 
 		current_chunk++;
 		int percentage = (int)((current_chunk * 100) / chunk_count);
@@ -152,6 +195,7 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
 	printf("\n"); // Move to new line after completion
 
 	free(buffer);
+	free(encrypted_chunk);
 	fclose(fp);
 }
 
@@ -193,6 +237,3 @@ int sender_main(int argc, char const* argv[]) {
 
 	return 0;
 }
-
-// TODO: Maybe multithread the computing of the hash and sending of the file chunks. 
-// So the sender can send the file chunks while the hash is being computed.
