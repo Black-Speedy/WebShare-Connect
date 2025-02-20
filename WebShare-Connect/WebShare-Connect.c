@@ -3,113 +3,130 @@
  * @brief Main program file containing the entry point.
  */
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
 #include "WebShare-Connect.h"
 #include "sender.h"
 #include "receiver.h"
 #include "removeQuotes.h"
-#include <nice.h>
 
 #ifndef MAX_THREADS
 #define MAX_THREADS 100
-#endif // !MAX_THREADS
+#endif
 
+#define MAX_INPUT_SIZE 256
 
- /**
-  * @brief The main function. This is where the program starts.
-  *
-  * @param argc The number of arguments passed to the program.
-  * @param argv The arguments passed to the program.
-  *             - argv[0]: Program name
-  *             - argv[1]: Operation mode (sender/receiver)
-  *             - argv[2]: Port number
-  *             - argv[3]: Number of threads
-  *             - argv[4]: File path
-  *
-  * @return 0 if the program exits successfully, 1 otherwise.
-  */
-int main(int argc, char const* argv[])
-{
-    char* user_argv[5]; // Array of arguments to pass to sender_main or receiver_main
+/**
+ * @brief Gets user input and ensures it's valid.
+ * @param prompt The message to display to the user.
+ * @param buffer The buffer to store the user input.
+ * @param size The maximum size of the input.
+ */
+void get_user_input(const char *prompt, char *buffer, int size) {
+    int error = 0;
+    do {
+        printf("%s", prompt);
+        if (fgets(buffer, size, stdin) == NULL) {
+            printf("Input error. Please try again.\n");
+            continue;
+        }
+        buffer[strcspn(buffer, "\n")] = '\0'; // Remove trailing newline
+        error = (strlen(buffer) > 0);
+        if (!error) {
+            printf("Invalid input. Please try again.\n");
+        }
+    } while (!error);
+}
+
+/**
+ * @brief Gets a valid integer input within a specified range.
+ * @param prompt The message to display to the user.
+ * @param min The minimum acceptable value.
+ * @param max The maximum acceptable value.
+ * @return A valid integer within the given range.
+ */
+int get_valid_int(const char *prompt, int min, int max) {
+    char buffer[MAX_INPUT_SIZE];
+    int value, error;
+    do {
+        get_user_input(prompt, buffer, sizeof(buffer));
+        error = sscanf(buffer, "%d", &value);
+        if (error != 1 || value < min || value > max) {
+            printf("Invalid input. Please enter a number between %d and %d.\n", min, max);
+            error = 0;
+        }
+    } while (!error);
+    return value;
+}
+
+/**
+ * @brief Handles user input for the required arguments.
+ * @param user_argv Array to store user inputs.
+ */
+void handle_user_input(char *user_argv[]) {
+    char mode[MAX_INPUT_SIZE];
+    char port[MAX_INPUT_SIZE];
+    char threads[MAX_INPUT_SIZE];
+    char filePath[MAX_INPUT_SIZE];
+
+    // Get mode input
+    do {
+        get_user_input("Enter 'sender' / 'server' or 'receiver' / 'client': ", mode, sizeof(mode));
+    } while (strcmp(mode, "sender") != 0 && strcmp(mode, "receiver") != 0 &&
+             strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0);
+
+    // Get port input
+    int portNum = get_valid_int("Enter the port (1-65535): ", 1, 65535);
+    snprintf(port, sizeof(port), "%d", portNum);
+
+    // Get threads input
+    int threadNum = get_valid_int("Enter the number of threads (1-100): ", 1, MAX_THREADS);
+    snprintf(threads, sizeof(threads), "%d", threadNum);
+
+    // Get file path input
+    get_user_input("Enter the file path: ", filePath, sizeof(filePath));
+
+    // Remove quotes if present
+    if (containsQuotes(filePath)) {
+        printf("File path contains quotes. Removing them...\n");
+        char *newFilePath = removeQuotes(filePath);
+        strncpy(filePath, newFilePath, sizeof(filePath) - 1);
+        filePath[sizeof(filePath) - 1] = '\0';
+    }
+
+    // Populate user_argv
+    printf("Name: %s\n", user_argv[0]);
+    user_argv[1] = strdup(mode);
+    user_argv[2] = strdup(port);
+    user_argv[3] = strdup(threads);
+    user_argv[4] = strdup(filePath);
+}
+
+int main(int argc, char const *argv[]) {
+    char *user_argv[5];
+    user_argv[0] = strdup(argv[0]);
     if (5 == argc) {
-        // set user_argv to argv
-        for (int i = 0; i < argc; i++) {
+        for (int i = 1; i < argc; i++) {
             user_argv[i] = strdup(argv[i]);
         }
+    } else {
+        handle_user_input(user_argv);
     }
-    else {
-        char mode[10] = { 0 };
-        int error;
-        char port[6] = { 0 };
-        char threads[4] = { 0 };
-        char filePath[256];
-        do {
-            printf("Please enter either 'sender' / 'server' or 'receiver' / 'client': ");
-            error = scanf("%9s", mode);
-            if (error != 1) {
-                printf("Input error. Please try again.\n");
-                error = scanf("%*[^\n]"); // Clear the input buffer
-            }
-            else if (strcmp(mode, "sender") != 0 && strcmp(mode, "receiver") != 0 
-                    && strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0) {
-                printf("Invalid mode entered. Please try again.\n");
-            }
-        } while (strcmp(mode, "sender") != 0 && strcmp(mode, "receiver") != 0 
-                && strcmp(mode, "server") != 0 && strcmp(mode, "client") != 0);
 
-        do {
-            printf("Please enter the port (0-65535): ");
-            error = scanf("%5s", port);
-            if (error != 1) {
-                printf("Input error. Please try again.\n");
-                error = scanf("%*[^\n]"); // Clear the input buffer
-            }
-            int portNum = atoi(port);
-            if ((portNum < 1) != (portNum > (pow(2, 16) - 1))) {
-                printf("Invalid number of threads. Please enter a number between 1 and %d.\n", MAX_THREADS);
-                error = 0;
-            }
-        } while (error != 1);
-
-        do {
-            printf("Please enter the number of threads: ");
-            error = scanf("%3s", threads);
-            if (error != 1) {
-                printf("Input error. Please try again.\n");
-                error = scanf("%*[^\n]"); // Clear the input buffer
-            }
-            int threadNum = atoi(threads);
-            if ((threadNum < 1) != (threadNum > MAX_THREADS)) {
-                printf("Invalid number of threads. Please enter a number between 1 and %d.\n", MAX_THREADS);
-                error = 0;
-            }
-        } while (error != 1);
-
-        int c;
-        while ((c = getchar()) != '\n' && c != EOF);
-        printf("Please enter the file path: ");
-        fgets(filePath, 256, stdin);
-        filePath[strcspn(filePath, "\n")] = 0; // Remove trailing newline
-
-        user_argv[0] = strdup(argv[0]); // Program name
-        user_argv[1] = strdup(mode);
-        user_argv[2] = strdup(port);
-        user_argv[3] = strdup(threads);
-
-        if (containsQuotes(filePath)) {
-            printf("contains quotes and removing them\n");
-            char* newFilePath = removeQuotes(filePath);
-            user_argv[4] = strdup(newFilePath);
-        }
-        else user_argv[4] = strdup(filePath);
-	}
-    if (strcmp(user_argv[1], "sender") == 0 || strcmp(user_argv[1], "server") == 0) {
-        return sender_main(argc - 1, user_argv + 1);
-    }
-    else if (strcmp(user_argv[1], "receiver") == 0 || strcmp(user_argv[1], "client") == 0) {
-        return receiver_main(argc - 1, user_argv + 1);
-    }
-    else {
+    // finding the mode
+    int result = 1;
+    if (0 == strcmp(user_argv[1], "sender") || 0 == strcmp(user_argv[1], "server")) {
+        result = sender_main(4, user_argv + 1);
+    } else if (0 == strcmp(user_argv[1], "receiver") || 0 == strcmp(user_argv[1], "client")) {
+        result = receiver_main(4, user_argv + 1);
+    } else {
         printf("Usage: %s [sender|receiver]\n", user_argv[0]);
-        return 1;
     }
+
+    for (int i = 0; i < 5; i++) {
+        free(user_argv[i]);
+    }
+
+    return result;
 }

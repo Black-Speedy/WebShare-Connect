@@ -145,7 +145,7 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
     // Compute hash of received file and compare with the expected hash
     unsigned char* expected_hash = header.hash;
     unsigned char received_hash[SHA512_DIGEST_LENGTH];
-    compute_sha512(output_file_path, received_hash); // Compute hash of received file
+    compute_sha512(output_file_path, received_hash);
     char received_hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
     char expected_hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
     convert_hash_to_hex_string(received_hash, received_hash_string, SHA512_DIGEST_LENGTH); // Convert received hash
@@ -172,6 +172,24 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
     }
 }
 
+void split_ip_port(const char *input, char **ip_address, char **port) {
+    char *colon_pos = strchr(input, ':');
+
+    if (colon_pos == NULL) {
+        // No port provided, treat entire input as IP
+        *ip_address = strdup(input);
+        *port = NULL;
+    } else {
+        // Split IP and Port
+        size_t ip_len = colon_pos - input;
+        *ip_address = (char *)malloc(ip_len + 1);
+        strncpy(*ip_address, input, ip_len);
+        (*ip_address)[ip_len] = '\0';
+
+        *port = strdup(colon_pos + 1);
+    }
+}
+
 /**
  * @brief The main function for the receiver.
  *
@@ -189,13 +207,21 @@ int receiver_main(int argc, char const* argv[]) {
         return 1;
     }
 
-    // temporary ip address should come in argument
-    const char* ip_address = "matinisthymaster.asuscomm.com";
-    const char* port = argv[1];
+    // split the ip address and port number
+    const char *input = argv[1];  // IP:Port argument
+    printf("Input: %s\n", input);
+    
+    char *ip_address;
+    char *port;
+    split_ip_port(input, &ip_address, &port);
+
+    printf("IP Address: %s\n", ip_address);
+    printf("Port: %s\n", port);
+
     int threads = atoi(argv[2]);
     const char* output_file_path = argv[3];
 
-    printf("Connecting to sender at port %s...\n", port);
+    printf("Connecting to sender at ip:port %s:%s...\n", ip_address, port);
 
     void* context = zmq_ctx_new();
     assert(context);
@@ -204,21 +230,22 @@ int receiver_main(int argc, char const* argv[]) {
     printf("Creating receiver socket\n");
     zsock_t* receiver_sock = receiver(context, ip_address, port, threads);
     assert(receiver_sock);
-    printf("Assert 4\n");
 
     // Receive file
     receiver_receive(receiver_sock, output_file_path);
     printf("\x1b[32mFile transfer completed successfully.\x1b[32m\n ");
     // return to normal colorr
     printf("\x1b[0m\n");
-
-    printf("Press Enter to exit.\n");
-    char x = getchar();
-    scanf("%c", &x) ? x : x;
-
+    
     // Clean up
     zsock_destroy(&receiver_sock);
     zmq_ctx_destroy(&context);
+    free(ip_address);
+    free(port);
+    
+    // Wait for user input before exiting
+    printf("Press Enter to exit.\n");
+    getchar();
 
     return 0;
 }
