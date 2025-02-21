@@ -1,10 +1,12 @@
 /**
-* @file sender.h
-* @brief Header file for the main sender functionality.
-*/
+ * @file sender.h
+ * @brief Header file for the main sender functionality.
+ */
 
 #include "common.h"
 #include "fileChunks.h"
+
+#define MAX_RETRIES    5
 
 /**
  * @brief Sets up a sender socket.
@@ -16,7 +18,8 @@
  * @param threads The number of threads to use.
  * @return A pointer to the created sender socket.
  */
-zsock_t* sender(void* context, const char* port, int threads);
+zsock_t *sender(void *context, const char *port, int threads);
+
 /**
  * @brief Sends a file via the sender socket.
  *
@@ -25,7 +28,7 @@ zsock_t* sender(void* context, const char* port, int threads);
  * @param serv_sock The sender socket to use for sending the file.
  * @param file_path The path to the file to be sent.
  */
-void sender_send(zsock_t* serv_sock, const char* output_file_path);
+void sender_send(zsock_t *serv_sock, const char *output_file_path);
 
 /**
  * @brief The main function for the sender.
@@ -36,4 +39,4 @@ void sender_send(zsock_t* serv_sock, const char* output_file_path);
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int sender_main(int argc, char const* argv[]);
+int sender_main(int argc, char const *argv[]);

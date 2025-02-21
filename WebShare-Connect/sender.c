@@ -14,10 +14,10 @@
  * @brief Struct representing file information.
  */
 typedef struct {
-	// This is the header for the file
-	int64_t file_size;
-	int chunk_size;
-	unsigned char hash[SHA512_DIGEST_LENGTH];
+    // This is the header for the file
+    int64_t       file_size;
+    int           chunk_size;
+    unsigned char hash[SHA512_DIGEST_LENGTH];
 } file_header_t;
 
 /**
@@ -32,19 +32,19 @@ typedef struct {
  */
 zsock_t* sender(void* context, const char *port, int threads)
 {
-	int io_threads = threads;
-	zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
-	assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
-	
-	zsock_t* serv_sock = zsock_new(ZMQ_PAIR);
-	assert(serv_sock);
+    int io_threads = threads;
+    zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
+    assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
 
-	int rc = zsock_bind(serv_sock, "tcp://*:%s", port);
-	assert(rc != -1);
+    zsock_t* serv_sock = zsock_new(ZMQ_PAIR);
+    assert(serv_sock);
 
-	zsock_set_rcvtimeo(serv_sock, 2000); // 2s timeout for recv
+    int rc = zsock_bind(serv_sock, "tcp://*:%s", port);
+    assert(rc != -1);
 
-	return serv_sock;
+    zsock_set_sndtimeo(serv_sock, 2000);     // 2s timeout for recv
+
+    return serv_sock;
 }
 
 /**
@@ -57,101 +57,101 @@ zsock_t* sender(void* context, const char *port, int threads)
  */
 void sender_send(zsock_t* serv_sock, const char* file_path)
 {
-	// Open file
-	FILE* fp = fopen(file_path, "rb");
-	if (!fp) {
-		printf("Error: File open failed.\n");
-		return;
-	}
+    // Open file
+    FILE* fp = fopen(file_path, "rb");
+    if (!fp) {
+        printf("Error: File open failed.\n");
+        return;
+    }
 
-	// Determine file size
-	fseek(fp, 0L, SEEK_END);
-	int64_t file_size;
+    // Determine file size
+    fseek(fp, 0L, SEEK_END);
+    int64_t file_size;
 
-	#ifdef WIN32
-		file_size = _ftelli64(fp);
-	#else
-		file_size = ftell(fp);
-	#endif
-	rewind(fp);
-	if (file_size < 1) {
-		printf("Error: File size error.\n");
-		fclose(fp);
-		return;
-	}
+        #ifdef WIN32
+    file_size = _ftelli64(fp);
+        #else
+    file_size = ftell(fp);
+        #endif
+    rewind(fp);
+    if (file_size < 1) {
+        printf("Error: File size error.\n");
+        fclose(fp);
+        return;
+    }
 
-	printf("  File size: %lld bytes\n", file_size);
+    printf("  File size: %lld bytes\n", file_size);
 
-	// Use get_chunk_size function from common.h
-	int chunk_size = get_chunk_size(file_size);
+    // Use get_chunk_size function from common.h
+    int chunk_size = get_chunk_size(file_size);
 
-	printf("  Chunk size: %d bytes\n", chunk_size);
+    printf("  Chunk size: %d bytes\n", chunk_size);
 
-	// Compute hash
-	unsigned char hash[SHA512_DIGEST_LENGTH];
-	compute_sha512(file_path, hash);
+    // Compute hash
+    unsigned char hash[SHA512_DIGEST_LENGTH];
+    compute_sha512(file_path, hash);
 
-	file_header_t header;
-	header.file_size = file_size;
-	header.chunk_size = chunk_size;
-	memcpy(header.hash, hash, SHA512_DIGEST_LENGTH);
+    file_header_t header;
+    header.file_size  = file_size;
+    header.chunk_size = chunk_size;
+    memcpy(header.hash, hash, SHA512_DIGEST_LENGTH);
 
-	printf("  Chunk size: %d bytes\n", chunk_size);
+    printf("  Chunk size: %d bytes\n", chunk_size);
 
-	// Convert hash to hex string
-	char hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
-	convert_hash_to_hex_string(hash, hash_string, SHA512_DIGEST_LENGTH);
-	printf("  Hash: %s\n", hash_string);
+    // Convert hash to hex string
+    char hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
+    convert_hash_to_hex_string(hash, hash_string, SHA512_DIGEST_LENGTH);
+    printf("  Hash: %s\n", hash_string);
 
-	// Send file header
-	zsock_send(serv_sock, "b", &header, sizeof(header));
+    // Send file header
+    zsock_send(serv_sock, "b", &header, sizeof(header));
 
-	// Allocate buffer and send file
-	char* buffer = (char*)malloc(chunk_size);
-	if (!buffer) {
-		printf("Error: Memory allocation failed.\n");
-		fclose(fp);
-		return;
-	}
+    // Allocate buffer and send file
+    char* buffer = (char*)malloc(chunk_size);
+    if (!buffer) {
+        printf("Error: Memory allocation failed.\n");
+        fclose(fp);
+        return;
+    }
 
-	int64_t chunk_count = file_size / (int64_t)chunk_size + (file_size % (int64_t)chunk_size != 0);
-	int current_chunk = 0;
-	printf("  Total chunks to send: %lld\n", chunk_count);
+    int64_t chunk_count   = file_size / (int64_t)chunk_size + (file_size % (int64_t)chunk_size != 0);
+    int     current_chunk = 0;
+    printf("  Total chunks to send: %lld\n", chunk_count);
 
-	int is_complete = 0;
-	while (1) {
-		memset(buffer, 0, chunk_size);
-		size_t bytesRead = fread(buffer, 1, chunk_size, fp);
-		if (bytesRead == 0) {
-			if (ferror(fp)) perror("Error reading file");
-			is_complete = 1; // Mark as complete if finished reading
-			break;
-		}
-		zsock_send(serv_sock, "b", buffer, bytesRead);
+    int is_complete = 0;
+    while (1) {
+        memset(buffer, 0, chunk_size);
+        size_t bytesRead = fread(buffer, 1, chunk_size, fp);
+        if (bytesRead == 0) {
+            if (ferror(fp)) perror("Error reading file");
+            is_complete = 1;             // Mark as complete if finished reading
+            break;
+        }
+        zsock_send(serv_sock, "b", buffer, bytesRead);
 
-		current_chunk++;
-		int percentage = (int)((current_chunk * 100) / chunk_count);
-		printProgressBar(percentage, current_chunk, chunk_count, is_complete);
+        current_chunk++;
+        int percentage = (int)((current_chunk * 100) / chunk_count);
+        printProgressBar(percentage, current_chunk, chunk_count, is_complete);
 
-		char* ack = zstr_recv(serv_sock);
-		if (!ack) {
-			fprintf(stderr, "Failed to receive acknowledgment: %s\n", zmq_strerror(errno));
-			break;
-		}
-		if (strcmp(ack, "ACK") != 0) {
-			fprintf(stderr, "Received incorrect acknowledgment\n");
-			free(ack);
-			break;
-		}
-		free(ack);
-	}
+        char* ack = zstr_recv(serv_sock);
+        if (!ack) {
+            fprintf(stderr, "Failed to receive acknowledgment: %s\n", zmq_strerror(errno));
+            break;
+        }
+        if (strcmp(ack, "ACK") != 0) {
+            fprintf(stderr, "Received incorrect acknowledgment\n");
+            free(ack);
+            break;
+        }
+        free(ack);
+    }
 
-	// Final display with completion
-	printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
-	printf("\n"); // Move to new line after completion
+    // Final display with completion
+    printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
+    printf("\n");                                         // Move to new line after completion
 
-	free(buffer);
-	fclose(fp);
+    free(buffer);
+    fclose(fp);
 }
 
 
@@ -165,33 +165,32 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
  * @return An integer representing the exit status.
  */
 int sender_main(int argc, char const* argv[]) {
-	if (argc < 4) 
-	{
-		printf("Usage: %s sender [port] [threads] [file_path]\n", argv[-1]);
-		return 1;
-	}
+    if (argc < 4) {
+        printf("Usage: %s sender [port] [threads] [file_path]\n", argv[-1]);
+        return 1;
+    }
 
-	const char* port = argv[1];
-	int threads = atoi(argv[2]);
-	const char* file_path = argv[3];
-	printf("Port: %s\nThreads: %d\nFile path: %s\n", port, threads, file_path);
+    const char* port      = argv[1];
+    int       threads     = atoi(argv[2]);
+    const char* file_path = argv[3];
+    printf("Port: %s\nThreads: %d\nFile path: %s\n", port, threads, file_path);
 
-	void* context = zmq_ctx_new();
-	assert(context);
+    void* context = zmq_ctx_new();
+    assert(context);
 
-	// Create and bind the PUSH socket
-	zsock_t* serv_sock = sender(context, port, threads);
-	assert(serv_sock);
+    // Create and bind the PUSH socket
+    zsock_t* serv_sock = sender(context, port, threads);
+    assert(serv_sock);
 
-	// Send the file
-	sender_send(serv_sock, file_path);
+    // Send the file
+    sender_send(serv_sock, file_path);
 
-	// Clean up
-	zsock_destroy(&serv_sock);
-	zmq_ctx_destroy(&context);
+    // Clean up
+    zsock_destroy(&serv_sock);
+    zmq_ctx_destroy(&context);
 
-	return 0;
+    return 0;
 }
 
-// TODO: Maybe multithread the computing of the hash and sending of the file chunks. 
+// TODO: Maybe multithread the computing of the hash and sending of the file chunks.
 // So the sender can send the file chunks while the hash is being computed.

@@ -1,7 +1,7 @@
 /**
-* @file receiver.h
-* @brief Header file for the main receiver functionality.
-*/
+ * @file receiver.h
+ * @brief Header file for the main receiver functionality.
+ */
 
 #include "common.h"
 #include "fileChunks.h"

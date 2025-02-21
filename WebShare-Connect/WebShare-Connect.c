@@ -12,10 +12,10 @@
 #include "removeQuotes.h"
 
 #ifndef MAX_THREADS
-#define MAX_THREADS 100
+#define MAX_THREADS       100
 #endif
 
-#define MAX_INPUT_SIZE 256
+#define MAX_INPUT_SIZE    256
 
 /**
  * @brief Gets user input and ensures it's valid.
@@ -31,6 +31,7 @@ void get_user_input(const char *prompt, char *buffer, int size) {
             printf("Input error. Please try again.\n");
             continue;
         }
+
         buffer[strcspn(buffer, "\n")] = '\0'; // Remove trailing newline
         error = (strlen(buffer) > 0);
         if (!error) {
@@ -48,7 +49,7 @@ void get_user_input(const char *prompt, char *buffer, int size) {
  */
 int get_valid_int(const char *prompt, int min, int max) {
     char buffer[MAX_INPUT_SIZE];
-    int value, error;
+    int  value, error;
     do {
         get_user_input(prompt, buffer, sizeof(buffer));
         error = sscanf(buffer, "%d", &value);
@@ -57,6 +58,7 @@ int get_valid_int(const char *prompt, int min, int max) {
             error = 0;
         }
     } while (!error);
+
     return value;
 }
 
@@ -118,7 +120,7 @@ int main(int argc, char const *argv[]) {
     int result = 1;
     if (0 == strcmp(user_argv[1], "sender") || 0 == strcmp(user_argv[1], "server")) {
         result = sender_main(4, user_argv + 1);
-    } else if (0 == strcmp(user_argv[1], "receiver") || 0 == strcmp(user_argv[1], "client")) {
+    } else if (0 == strcmp(user_argv[1], "receiver") || 0 == strcmp(user_argv[1], "client"))  {
         result = receiver_main(4, user_argv + 1);
     } else {
         printf("Usage: %s [sender|receiver]\n", user_argv[0]);

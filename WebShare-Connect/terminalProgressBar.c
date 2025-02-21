@@ -2,23 +2,24 @@
 
 void applyStatusColor(int is_complete) {
     #ifdef _WIN32
-    HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-    if (is_complete) {
-        SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Green color for completion
-    } else {
-        SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN); // Yellow color for progress
-    }
+        HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
+        if (is_complete) {
+            SetConsoleTextAttribute(hConsole, FOREGROUND_GREEN | FOREGROUND_INTENSITY); // Green color for completion
+        } else {
+            SetConsoleTextAttribute(hConsole, FOREGROUND_RED | FOREGROUND_GREEN);       // Yellow color for progress
+        }
+
     #else
-    if (is_complete) {
-        printf("\033[0;32m"); // Green color for completion on Unix
-    } else {
-        printf("\033[0;33m"); // Yellow color for progress on Unix
-    }
+        if (is_complete) {
+            printf("\033[0;32m"); // Green color for completion on Unix
+        } else {
+            printf("\033[0;33m"); // Yellow color for progress on Unix
+        }
+
     #endif
 }
 
 void resetConsoleColor() {
-    
     printf("\033[0m"); // Reset color on Unix
 }
 
@@ -40,7 +41,7 @@ void printProgressBar(int percentage, int current_chunk, int total_chunks, int i
                 printf("█"); // Use Unicode solid block on Linux
             #endif
         else
-            printf("-"); 
+            printf("-");
     }
 
     // Display the percentage and chunk information

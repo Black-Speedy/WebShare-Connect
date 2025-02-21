@@ -2,10 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int compute_sha512(const char* path, unsigned char output[SHA512_DIGEST_LENGTH]) {
-    
+int compute_sha512(const char*path, unsigned char output[SHA512_DIGEST_LENGTH]) {
     // Open file
-    FILE* file = fopen(path, "rb");
+    FILE*file = fopen(path, "rb");
     if (!file) {
         perror("File opening failed");
         return -1;
@@ -15,9 +14,9 @@ int compute_sha512(const char* path, unsigned char output[SHA512_DIGEST_LENGTH])
     SHA512_CTX sha512;
     SHA512_Init(&sha512);
 
-    // Read the File 
+    // Read the File
     const int bufSize = 32768;
-    char* buffer = malloc(bufSize);
+    char      *buffer = malloc(bufSize);
     if (!buffer) {
         fclose(file);
         return -1;
@@ -38,7 +37,7 @@ int compute_sha512(const char* path, unsigned char output[SHA512_DIGEST_LENGTH])
     return 0;
 }
 
-void convert_hash_to_hex_string(unsigned char* hash, char* hex_string, size_t hash_length) {
+void convert_hash_to_hex_string(unsigned char*hash, char*hex_string, size_t hash_length) {
     for (size_t i = 0; i < hash_length; i++) {
         sprintf(hex_string + (i * 2), "%02x", hash[i]);
     }
