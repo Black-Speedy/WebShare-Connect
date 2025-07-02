@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "removeQuotes.h"
+#include <string.h>
 
 /**
  * @file removeQuotes.c

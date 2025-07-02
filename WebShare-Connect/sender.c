@@ -8,6 +8,7 @@
 #include "sha512.h"
 #include "nice.h"
 #include <zmq.h>
+#include "terminalProgressBar.h"
 
 
 /**
@@ -164,7 +165,7 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int sender_main(int argc, char const* argv[]) {
+int sender_main(int argc, char *argv[]) {
     if (argc < 4) {
         printf("Usage: %s sender [port] [threads] [file_path]\n", argv[-1]);
         return 1;

@@ -199,7 +199,7 @@ void split_ip_port(const char *input, char **ip_address, char **port) {
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int receiver_main(int argc, char const *argv[]) {
+int receiver_main(int argc, char *argv[]) {
     if (argc < 4) {
         printf("Usage: %s receiver [port] [threads] [output file path]\n", argv[0]);
         return 1;
