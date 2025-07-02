@@ -21,9 +21,24 @@
             }
         },
         {
+            "name": "linux-base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/compiled/install/${presetName}"
+            },
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            }
+        },
+        {
             "name": "x64-debug",
             "displayName": "x64 Debug",
-            "inherits": "windows-base",
+            "inherits": ["windows-base", "linux-base"],
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
@@ -35,7 +50,7 @@
         {
             "name": "x64-release",
             "displayName": "x64 Release",
-            "inherits": "windows-base",
+            "inherits": ["windows-base", "linux-base"],
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
@@ -47,7 +62,7 @@
         {
             "name": "x86-debug",
             "displayName": "x86 Debug",
-            "inherits": "windows-base",
+            "inherits": ["windows-base", "linux-base"],
             "architecture": {
                 "value": "x86",
                 "strategy": "external"
@@ -59,7 +74,11 @@
         {
             "name": "x86-release",
             "displayName": "x86 Release",
-            "inherits": "x86-debug",
+            "inherits": ["windows-base", "linux-base"],
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
