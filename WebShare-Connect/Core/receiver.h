@@ -39,4 +39,4 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path);
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int receiver_main(int argc, char *argv[]);
+int receiver_main(int argc, char *argv[], int mode);

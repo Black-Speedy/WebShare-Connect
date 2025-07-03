@@ -3,11 +3,11 @@
  * @brief Main receiver functionality.
  */
 
-#include "WebShare-Connect.h"
+#include "common.h"
 #include "receiver.h"
 #include "sha512.h"
 #include "nice.h"
-#include "terminalProgressBar.h"
+#include "../CLI/terminalProgressBar.h"
 
 /**
  * @brief Struct representing file information.
@@ -129,8 +129,9 @@ void receiver_receive(zsock_t *receiver_sock, const char *output_file_path) {
         received_size += size;
         current_chunk++;
         int percentage = (int)((received_size * 100) / file_size);
-        printProgressBar(percentage, current_chunk, chunk_count, is_complete);
-
+        if (1 == CLI) {
+            printProgressBar(percentage, current_chunk, chunk_count, is_complete);
+        }
         if (zstr_send(receiver_sock, "ACK") == -1) {
             fprintf(stderr, "Error sending acknowledgment: %s\n", zmq_strerror(errno));
         }
@@ -199,7 +200,7 @@ void split_ip_port(const char *input, char **ip_address, char **port) {
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int receiver_main(int argc, char *argv[]) {
+int receiver_main(int argc, char *argv[], int mode) {
     if (argc < 4) {
         printf("Usage: %s receiver [port] [threads] [output file path]\n", argv[0]);
         return 1;

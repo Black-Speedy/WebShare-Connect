@@ -7,6 +7,7 @@
 #include <openssl/engine.h>
 #include <openssl/bn.h>
 #include <openssl/err.h>
+#include <czmq.h>
 
 
 
@@ -37,3 +38,7 @@
 
 /* slightly less awkward string equality check */
 #define string_equal(x, y)    (strncmp((x), (y), strlen(y)) == 0)
+
+// Modes of operation
+#define CLI 1
+#define GUI 2

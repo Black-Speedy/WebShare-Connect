@@ -119,9 +119,9 @@ int main(int argc, char const *argv[]) {
     // finding the mode
     int result = 1;
     if (0 == strcmp(user_argv[1], "sender") ) {
-        result = sender_main(4, user_argv+1);
+        result = sender_main(4, user_argv+1, CLI);
     } else if (0 == strcmp(user_argv[1], "receiver") || 0 == strcmp(user_argv[1], "client"))  {
-        result = receiver_main(4, user_argv+1);
+        result = receiver_main(4, user_argv+1, CLI);
     } else {
         printf("Usage: %s [sender|receiver]\n", user_argv[0]);
     }

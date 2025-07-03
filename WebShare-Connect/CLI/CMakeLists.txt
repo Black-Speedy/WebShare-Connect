@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.12)
+﻿cmake_minimum_required(VERSION 3.16)
 project(WebShare-Connect LANGUAGES C VERSION 0.0.1)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
@@ -18,7 +18,7 @@ endif()
 
 
 # Add include directories to your project.
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Include)
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../Include)
 
 # Add sender executable to the project.
 add_executable(WebShare-Connect 
@@ -26,20 +26,23 @@ add_executable(WebShare-Connect
     "WebShare-Connect.h"
 )
 
-# Add libraries
-add_library(sha512 "sha512.c" "sha512.h")
-# Disable all warnings for the sha512 library
-if (MSVC)
-    target_compile_options(sha512 PRIVATE /w)
-else()
-    target_compile_options(sha512 PRIVATE -w)
-endif()
+# # Add libraries
+# add_library(sha512 "../Core/sha512.c" "../Core/sha512.h")
+# # Disable all warnings for the sha512 library
+# if (MSVC)
+#     target_compile_options(sha512 PRIVATE /w)
+# else()
+#     target_compile_options(sha512 PRIVATE -w)
+# endif()
 
-add_library(sender "sender.c" "sender.h")
-add_library(receiver "receiver.c" "receiver.h")
-add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
-add_library(fileChunks "Include/fileChunks.c" "Include/fileChunks.h")
+# add_library(sender "../Core/sender.c" "../Core/sender.h")
+# add_library(receiver "../Core/receiver.c" "../Core/receiver.h")
+# add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
+# add_library(fileChunks "../Include/fileChunks.c" "../Include/fileChunks.h")
 add_library(terminalProgressBar "terminalProgressBar.c" "terminalProgressBar.h")
+
+# Also build the core libraries
+include_directories("../Core")
 
 # Include the OpenSSL include directory
 include_directories(${OPENSSL_INCLUDE_DIR})
@@ -57,29 +60,7 @@ target_link_libraries(WebShare-Connect PRIVATE
     terminalProgressBar
     )
 
-# Link libraries to sender and receiver targets
-target_link_libraries(sender PRIVATE 
-    czmq 
-    libzmq
-    sha512 
-    OpenSSL::SSL 
-    OpenSSL::Crypto
-    LibNice::LibNice
-    fileChunks
-    terminalProgressBar
-)
-
-target_link_libraries(receiver PRIVATE 
-    czmq
-    libzmq
-    LibNice::LibNice
-    fileChunks
-    terminalProgressBar
-)
-
 target_link_libraries(terminalProgressBar PRIVATE)
-
-target_link_libraries(sha512 PRIVATE OpenSSL::SSL OpenSSL::Crypto)
 
 # Set C standard
 set_property(TARGET WebShare-Connect PROPERTY C_STANDARD 11)

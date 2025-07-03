@@ -28,7 +28,7 @@ zsock_t *sender(void *context, const char *port, int threads);
  * @param serv_sock The sender socket to use for sending the file.
  * @param file_path The path to the file to be sent.
  */
-void sender_send(zsock_t *serv_sock, const char *output_file_path);
+void sender_send(zsock_t *serv_sock, const char *output_file_path, int mode);
 
 /**
  * @brief The main function for the sender.
@@ -39,4 +39,4 @@ void sender_send(zsock_t *serv_sock, const char *output_file_path);
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int sender_main(int argc, char *argv[]);
+int sender_main(int argc, char *argv[], int mode);

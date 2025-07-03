@@ -1,19 +1,20 @@
-﻿cmake_minimum_required(VERSION 3.12)
+﻿cmake_minimum_required(VERSION 3.16)
 
 if(WIN32)
 # Set the vcpkg toolchain file if vcpkg is being used
-    message("VCPKG_ROOT: ${VCPKG_ROOT}")
     if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-        # Checks if vcpkg is installed and added to the PATH then makes a 
-        execute_process(
-        COMMAND where vcpkg
-        OUTPUT_VARIABLE VCPKG_EXE_PATH
-        OUTPUT_STRIP_TRAILING_WHITESPACE
-        )
-    
-        get_filename_component(VCPKG_ROOT "${VCPKG_EXE_PATH}" DIRECTORY cache string "")
-        set(ENV{VCPKG_ROOT} "${VCPKG_ROOT}")
-
+        if(NOT DEFINED VCPKG_ROOT)
+            # Checks if vcpkg is installed and added to the PATH then makes a 
+            execute_process(
+            COMMAND where vcpkg
+            OUTPUT_VARIABLE VCPKG_EXE_PATH
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            )
+        
+            get_filename_component(VCPKG_ROOT "${VCPKG_EXE_PATH}" DIRECTORY cache string "")
+            set(ENV{VCPKG_ROOT} "${VCPKG_ROOT}")
+            message("VCPKG_ROOT: $ENV{VCPKG_ROOT}")
+        endif()
 
         set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
         set(ENV{CMAKE_TOOLCHAIN_FILE} "${CMAKE_TOOLCHAIN_FILE}")
@@ -55,8 +56,20 @@ if(LibNice_FOUND)
     message("LibNice Found: " ${LibNice_FOUND})
     message("LibNice Version: ${LibNice_VERSION}")
 endif()
-# Include sub-projects.
-add_subdirectory("WebShare-Connect")
+
+
+# Include sub-projects #
+
+# Compile Everything
+# add_subdirectory("WebShare-Connect/APP")
+
+# Compile Core Libraries
+add_subdirectory("WebShare-Connect/Core")
+
+# Compile CLI
+add_subdirectory("WebShare-Connect/CLI")
+# Compile Core GUI
+# add_subdirectory("WebShare-Connect/GUI")
 
 # Link libraries to your project (replace 'your_target_name' with the actual target name)
 # target_link_libraries(your_target_name PRIVATE czmq ZeroMQ::ZeroMQ)

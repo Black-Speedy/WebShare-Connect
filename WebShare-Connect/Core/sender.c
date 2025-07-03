@@ -3,12 +3,12 @@
  * @brief Main sender functionality.
  */
 #include <stdio.h>
-#include "WebShare-Connect.h"
+#include "common.h"
 #include "sender.h"
 #include "sha512.h"
 #include "nice.h"
 #include <zmq.h>
-#include "terminalProgressBar.h"
+#include "../CLI/terminalProgressBar.h"
 
 
 /**
@@ -56,7 +56,7 @@ zsock_t* sender(void* context, const char *port, int threads)
  * @param serv_sock The sender socket to use for sending the file.
  * @param file_path The path to the file to be sent.
  */
-void sender_send(zsock_t* serv_sock, const char* file_path)
+void sender_send(zsock_t* serv_sock, const char* file_path, int mode)
 {
     // Open file
     FILE* fp = fopen(file_path, "rb");
@@ -148,7 +148,9 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
     }
 
     // Final display with completion
-    printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
+    if (mode == CLI) {
+        printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
+    }
     printf("\n");                                         // Move to new line after completion
 
     free(buffer);
@@ -165,14 +167,14 @@ void sender_send(zsock_t* serv_sock, const char* file_path)
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int sender_main(int argc, char *argv[]) {
+int sender_main(int argc, char *argv[], int mode) {
     if (argc < 4) {
         printf("Usage: %s sender [port] [threads] [file_path]\n", argv[-1]);
         return 1;
     }
 
     const char* port      = argv[1];
-    int       threads     = atoi(argv[2]);
+    int         threads   = atoi(argv[2]);
     const char* file_path = argv[3];
     printf("Port: %s\nThreads: %d\nFile path: %s\n", port, threads, file_path);
 
@@ -184,7 +186,7 @@ int sender_main(int argc, char *argv[]) {
     assert(serv_sock);
 
     // Send the file
-    sender_send(serv_sock, file_path);
+    sender_send(serv_sock, file_path, mode);
 
     // Clean up
     zsock_destroy(&serv_sock);
@@ -192,6 +194,3 @@ int sender_main(int argc, char *argv[]) {
 
     return 0;
 }
-
-// TODO: Maybe multithread the computing of the hash and sending of the file chunks.
-// So the sender can send the file chunks while the hash is being computed.
