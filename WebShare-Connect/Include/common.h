@@ -8,6 +8,7 @@
 #include <openssl/bn.h>
 #include <openssl/err.h>
 #include <czmq.h>
+#include <stddef.h>
 
 
 
@@ -42,3 +43,8 @@
 // Modes of operation
 #define CLI 1
 #define GUI 2
+
+typedef struct {
+    size_t length;
+    unsigned char data[]; // flexible array member
+} BufferWLength;

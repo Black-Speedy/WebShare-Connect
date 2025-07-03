@@ -1,9 +1,11 @@
 ﻿cmake_minimum_required(VERSION 3.16)
 
 if(WIN32)
+            message("VCPKG_ROOT: $ENV{VCPKG_ROOT}")
+
 # Set the vcpkg toolchain file if vcpkg is being used
     if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-        if(NOT DEFINED VCPKG_ROOT)
+        # if(NOT DEFINED VCPKG_ROOT)
             # Checks if vcpkg is installed and added to the PATH then makes a 
             execute_process(
             COMMAND where vcpkg
@@ -14,7 +16,7 @@ if(WIN32)
             get_filename_component(VCPKG_ROOT "${VCPKG_EXE_PATH}" DIRECTORY cache string "")
             set(ENV{VCPKG_ROOT} "${VCPKG_ROOT}")
             message("VCPKG_ROOT: $ENV{VCPKG_ROOT}")
-        endif()
+        # endif()
 
         set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
         set(ENV{CMAKE_TOOLCHAIN_FILE} "${CMAKE_TOOLCHAIN_FILE}")
@@ -22,7 +24,7 @@ if(WIN32)
 endif()
 
 # Enable Hot Reload for MSVC compilers if supported.
-if (POLICY CMP0141)
+if (CMAKE_C_COMPILER_ID STREQUAL "MSVC")
   cmake_policy(SET CMP0141 NEW)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()

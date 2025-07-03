@@ -26,19 +26,6 @@ add_executable(WebShare-Connect
     "WebShare-Connect.h"
 )
 
-# # Add libraries
-# add_library(sha512 "../Core/sha512.c" "../Core/sha512.h")
-# # Disable all warnings for the sha512 library
-# if (MSVC)
-#     target_compile_options(sha512 PRIVATE /w)
-# else()
-#     target_compile_options(sha512 PRIVATE -w)
-# endif()
-
-# add_library(sender "../Core/sender.c" "../Core/sender.h")
-# add_library(receiver "../Core/receiver.c" "../Core/receiver.h")
-# add_library(removeQuotes "removeQuotes.c" "removeQuotes.h")
-# add_library(fileChunks "../Include/fileChunks.c" "../Include/fileChunks.h")
 add_library(terminalProgressBar "terminalProgressBar.c" "terminalProgressBar.h")
 
 # Also build the core libraries

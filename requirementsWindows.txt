@@ -1,4 +1,8 @@
 czmq
+zeromq
 openssl
 libnice
 libsodium
+qtbase
+qtdeclarative
+qttools

@@ -60,3 +60,7 @@ build/
 buildWindows/
 buildLinux/
 Documentation/
+
+# Cache
+CMakeCache.txt
+CMakeFiles/

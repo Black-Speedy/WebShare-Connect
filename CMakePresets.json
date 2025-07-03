@@ -9,17 +9,17 @@
             "installDir": "${sourceDir}/compiled/install/${presetName}",
             "environment": {
                 // Path to vcpkg, adjust as necessary
-                "VCPKG_ROOT": "C:/Users/${env:USERNAME}/packagemanagers/vcpkg/"
+                "VCPKG_ROOT": "F:/packagemanagers/vcpkg"
                 // If needed below is how to se the path for the 
             },
             "cacheVariables": {
-                "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                "CMAKE_TOOLCHAIN_FILE": "${env:VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
                 
                 //** Choose compiler by setting path. If using a compiler that expects to have its other components
-                //*  in the enviroment then you must add it to path and then write {compilername}.exe
+                //*  in the enviroment then you can try adding it to path and then write {compilername}.exe
 
-                //"CMAKE_C_COMPILER": "",
-                //"CMAKE_CXX_COMPILER": ""
+                "CMAKE_C_COMPILER": "clang.exe",
+                "CMAKE_CXX_COMPILER": "clang.exe++.exe"
             },
             "condition": {
                 "type": "equals",
@@ -36,8 +36,8 @@
             "cacheVariables": {
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/compiled/install/${presetName}"
                 // Choose compiler by setting path
-                // "CMAKE_C_COMPILER": "cl.exe",
-                // "CMAKE_CXX_COMPILER": "cl.exe"
+                //,"CMAKE_C_COMPILER": "clang",
+                //"CMAKE_CXX_COMPILER": "clang++"
             },
             "condition": {
                 "type": "equals",
