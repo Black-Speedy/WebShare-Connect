@@ -18,8 +18,8 @@
                 //** Choose compiler by setting path. If using a compiler that expects to have its other components
                 //*  in the enviroment then you can try adding it to path and then write {compilername}.exe
 
-                "CMAKE_C_COMPILER": "clang.exe",
-                "CMAKE_CXX_COMPILER": "clang++.exe"
+                //"CMAKE_C_COMPILER": "clang.exe",
+                //"CMAKE_CXX_COMPILER": "clang++.exe"
             },
             "condition": {
                 "type": "equals",
