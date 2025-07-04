@@ -71,7 +71,7 @@ add_subdirectory("WebShare-Connect/Core")
 # Compile CLI
 add_subdirectory("WebShare-Connect/CLI")
 # Compile Core GUI
-# add_subdirectory("WebShare-Connect/GUI")
+add_subdirectory("WebShare-Connect/GUI")
 
 # Link libraries to your project (replace 'your_target_name' with the actual target name)
 # target_link_libraries(your_target_name PRIVATE czmq ZeroMQ::ZeroMQ)

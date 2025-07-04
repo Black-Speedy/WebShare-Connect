@@ -1,5 +1,5 @@
 ﻿cmake_minimum_required(VERSION 3.16)
-project(WebShare-Connect LANGUAGES C VERSION 0.0.1)
+project(WebShare-Connect_CLI LANGUAGES C VERSION 0.0.1)
 
 set(CMAKE_VERBOSE_MAKEFILE 1)
 
@@ -21,7 +21,7 @@ endif()
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../Include)
 
 # Add sender executable to the project.
-add_executable(WebShare-Connect 
+add_executable(WSC 
     "WebShare-Connect.c" 
     "WebShare-Connect.h"
 )
@@ -35,7 +35,7 @@ include_directories("../Core")
 include_directories(${OPENSSL_INCLUDE_DIR})
 
 # Link against libraries
-target_link_libraries(WebShare-Connect PRIVATE 
+target_link_libraries(WSC PRIVATE 
     sha512
     sender 
     receiver 
@@ -50,6 +50,6 @@ target_link_libraries(WebShare-Connect PRIVATE
 target_link_libraries(terminalProgressBar PRIVATE)
 
 # Set C standard
-set_property(TARGET WebShare-Connect PROPERTY C_STANDARD 11)
+set_property(TARGET WSC PROPERTY C_STANDARD 11)
 
 # TODO: Add tests and install targets if needed.
