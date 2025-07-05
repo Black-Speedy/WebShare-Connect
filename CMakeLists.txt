@@ -5,7 +5,7 @@ if(WIN32)
 
 # Set the vcpkg toolchain file if vcpkg is being used
     if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-        # if(NOT DEFINED VCPKG_ROOT)
+        if(NOT DEFINED VCPKG_ROOT)
             # Checks if vcpkg is installed and added to the PATH then makes a 
             execute_process(
             COMMAND where vcpkg
@@ -16,7 +16,7 @@ if(WIN32)
             get_filename_component(VCPKG_ROOT "${VCPKG_EXE_PATH}" DIRECTORY cache string "")
             set(ENV{VCPKG_ROOT} "${VCPKG_ROOT}")
             message("VCPKG_ROOT: $ENV{VCPKG_ROOT}")
-        # endif()
+        endif()
 
         set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
         set(ENV{CMAKE_TOOLCHAIN_FILE} "${CMAKE_TOOLCHAIN_FILE}")
@@ -58,7 +58,11 @@ if(LibNice_FOUND)
     message("LibNice Found: " ${LibNice_FOUND})
     message("LibNice Version: ${LibNice_VERSION}")
 endif()
-
+find_package(Qt6 REQUIRED)
+if(Qt6_FOUND)
+    message("Qt6 Found: " ${Qt6_FOUND})
+    message("Qt6 Version: ${Qt6_VERSION}")
+endif()
 
 # Include sub-projects #
 
