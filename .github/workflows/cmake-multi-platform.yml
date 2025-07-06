@@ -1,0 +1,72 @@
+# This starter workflow is for a CMake project running on multiple platforms. There is a different starter workflow if you just want a single platform.
+# See: https://github.com/actions/starter-workflows/blob/main/ci/cmake-single-platform.yml
+name: CMake Multi-Platform Build
+
+on:
+  push:
+    branches: [ "GitHub-cmake-test" ]
+  pull_request:
+    branches: [ "GitHub-cmake-test" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            build_type: Release
+            c_compiler: cl
+            cpp_compiler: cl
+            use_vcpkg: true
+
+          #- os: windows-latest
+          #  build_type: Release
+          #  c_compiler: clang
+          #  cpp_compiler: clang++
+          #  use_vcpkg: true
+
+          #- os: ubuntu-latest
+          #  build_type: Release
+          #  c_compiler: gcc
+          #  cpp_compiler: g++
+          #  use_vcpkg: false
+
+          #- os: ubuntu-latest
+          #  build_type: Release
+          #  c_compiler: clang
+          #  cpp_compiler: clang++
+          #  use_vcpkg: false
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set build output dir
+        id: vars
+        shell: bash
+        run: echo "build-dir=${{ github.workspace }}/build" >> $GITHUB_OUTPUT
+
+      - name: Setup vcpkg (Windows only)
+        if: matrix.use_vcpkg == true
+        shell: pwsh
+        run: |
+          git clone https://github.com/microsoft/vcpkg ${{ github.workspace }}/vcpkg
+          .\vcpkg\bootstrap-vcpkg.bat
+          .\vcpkg\vcpkg install czmq zeromq openssl libnice libsodium qtbase qtdeclarative qttools
+      - name: Configure CMake
+        run: >
+          cmake -B ${{ steps.vars.outputs.build-dir }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          ${{ matrix.use_vcpkg && format('-DCMAKE_TOOLCHAIN_FILE={0}/vcpkg/scripts/buildsystems/vcpkg.cmake', github.workspace) || '' }}
+          -S ${{ github.workspace }}
+      - name: Build
+        run: cmake --build ${{ steps.vars.outputs.build-dir }} --config ${{ matrix.build_type }}
+
+      - name: Test
+        working-directory: ${{ steps.vars.outputs.build-dir }}
+        run: ctest --build-config ${{ matrix.build_type }}
