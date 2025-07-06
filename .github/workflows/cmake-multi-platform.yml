@@ -7,7 +7,7 @@ on:
     branches: [ "GitHub-cmake-test" ]
   pull_request:
     branches: [ "GitHub-cmake-test" ]
-    workflow_dispatch:
+  workflow_dispatch:
 
 jobs:
   build:
