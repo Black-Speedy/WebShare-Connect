@@ -4,9 +4,9 @@ name: CMake Multi-Platform Build
 
 on:
   push:
-    branches: [ "GitHub-cmake-test" ]
+    branches: [ "test" ]
   pull_request:
-    branches: [ "GitHub-cmake-test" ]
+    branches: [ "test" ]
   workflow_dispatch:
 
 jobs:
