@@ -3,18 +3,19 @@
  * @brief Main receiver functionality.
  */
 
-#include "WebShare-Connect.h"
+#include "common.h"
 #include "receiver.h"
 #include "sha512.h"
 #include "nice.h"
+#include "../CLI/terminalProgressBar.h"
 
- /**
-  * @brief Struct representing file information.
-  */
+/**
+ * @brief Struct representing file information.
+ */
 typedef struct {
     // This is the header for the file
-    int64_t file_size;
-    int chunk_size;
+    int64_t       file_size;
+    int           chunk_size;
     unsigned char hash[SHA512_DIGEST_LENGTH];
 } file_header_t;
 
@@ -28,19 +29,22 @@ typedef struct {
  * @param threads The number of threads to use.
  * @return A pointer to the created receiver socket.
  */
-zsock_t* receiver(void* context, const char* port, int threads)
-{
+zsock_t * receiver(void *context, const char *ip_address, const char *port, int threads) {
+    //string ip adress
     int io_threads = threads;
     zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
     assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
 
-    zsock_t* receiver_sock = zsock_new(ZMQ_PAIR);
+    printf("Creating receiver socket in receiver()\n");
+    zsock_t *receiver_sock = zsock_new(ZMQ_PAIR);
     assert(receiver_sock);
+    printf("Assert 2\n");
 
-    int rc = zsock_connect(receiver_sock, "tcp://2.tcp.eu.ngrok.io:%s", port); // change to to sender ip when running on different machines
+    int rc = zsock_connect(receiver_sock, "tcp://%s:%s", ip_address, port); // change to to sender ip when running on different machines
     assert(rc != -1);
+    printf("Assert 3\n");
 
-    zsock_set_rcvtimeo(receiver_sock, 2000); // 2s timeout for recv
+    zsock_set_rcvtimeo(receiver_sock, 3000); // 2s timeout for recv
 
     return receiver_sock;
 }
@@ -54,14 +58,15 @@ zsock_t* receiver(void* context, const char* port, int threads)
  * @param receiver_sock The receiver socket used for receiving the file.
  * @param output_file_path The path to save the received file.
  */
-void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
+void receiver_receive(zsock_t *receiver_sock, const char *output_file_path) {
     printf("\n-- File Reception --\n");
 
     file_header_t header;
-    size_t header_size = sizeof(file_header_t);
-    byte* header_buf = NULL;
+    size_t        header_size = sizeof(file_header_t);
+    byte          *header_buf = NULL;
 
     // Receive the header
+    printf("Receiving header");
     int rc = zsock_recv(receiver_sock, "b", &header_buf, &header_size);
     if (rc == -1) {
         fprintf(stderr, "Error: Failed to receive header.\n");
@@ -80,22 +85,23 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
         fprintf(stderr, "Received header is NULL\n");
         return;
     }
+
     memcpy(&header, header_buf, sizeof(header));
     free(header_buf); // Free the received buffer after copying
 
-    int64_t file_size = header.file_size;
-    int chunk_size = header.chunk_size;
+    int64_t file_size  = header.file_size;
+    int     chunk_size = header.chunk_size;
     printf("Header received successfully.\n");
     printf("Expected file size: %lld bytes.\n", header.file_size);
     printf("Chunk size: %d bytes.\n", header.chunk_size);
 
-    char* buffer = (char*)malloc(header.chunk_size);
+    char *buffer = (char *)malloc(header.chunk_size);
     if (!buffer) {
         fprintf(stderr, "Error: Memory allocation failed.\n");
         return;
     }
 
-    FILE* fp = fopen(output_file_path, "wb");
+    FILE *fp = fopen(output_file_path, "wb");
     if (!fp) {
         fprintf(stderr, "Error: File open failed.\n");
         free(buffer);
@@ -103,9 +109,10 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
     }
 
     size_t received_size = 0;
-    int chunk_count = (file_size + chunk_size - 1) / chunk_size;
-    int current_chunk = 0;
+    int    chunk_count   = (file_size + chunk_size - 1) / chunk_size;
+    int    current_chunk = 0;
 
+    int is_complete = 0;
     while (received_size < file_size) {
         int size = zmq_recv(zsock_resolve(receiver_sock), buffer, chunk_size, 0);
         if (size == -1) {
@@ -118,43 +125,68 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
             fprintf(stderr, "Error writing to file: expected %d bytes, wrote %zu bytes\n", size, written);
             break;
         }
+
+        received_size += size;
+        current_chunk++;
+        int percentage = (int)((received_size * 100) / file_size);
+        if (1 == CLI) {
+            printProgressBar(percentage, current_chunk, chunk_count, is_complete);
+        }
         if (zstr_send(receiver_sock, "ACK") == -1) {
             fprintf(stderr, "Error sending acknowledgment: %s\n", zmq_strerror(errno));
         }
-        received_size += size;
-        current_chunk++;
-        printf("Chunk %d/%d received. Size: %d bytes.\n", current_chunk, chunk_count, size);
     }
+
+    // Final display with completion
+    printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
+    printf("\n");                                         // Move to new line after completion
     free(buffer);
     fclose(fp);
 
     // Compute hash of received file and compare with the expected hash
-    unsigned char* expected_hash = header.hash;
+    unsigned char *expected_hash = header.hash;
     unsigned char received_hash[SHA512_DIGEST_LENGTH];
-    compute_sha512(output_file_path, received_hash); // Compute hash of received file
-    char received_hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
+    //compute_sha512(output_file_path, received_hash);
+    //char received_hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
+    char received_hash_string[SHA512_DIGEST_LENGTH] = "123456789";
     char expected_hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
     convert_hash_to_hex_string(received_hash, received_hash_string, SHA512_DIGEST_LENGTH); // Convert received hash
     convert_hash_to_hex_string(expected_hash, expected_hash_string, SHA512_DIGEST_LENGTH); // Convert expected hash
 
     // Compare the raw binary hashes
-    if (memcmp(received_hash, expected_hash, SHA512_DIGEST_LENGTH) != 0)
-    {
+    if (memcmp(received_hash, expected_hash, SHA512_DIGEST_LENGTH) != 0) {
         fprintf(stderr, "Received file hash does not match\n");
         printf("Received Hash (binary): ");
-        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
-        {
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
             printf("%02x", received_hash[i]);
         }
+
         printf("\nExpected Hash (binary): ");
-        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++)
-        {
+        for (int i = 0; i < SHA512_DIGEST_LENGTH; i++) {
             printf("%02x", expected_hash[i]);
         }
+
         printf("\n");
-    }
-    else {
+    } else {
         printf("File hash verified successfully.\n");
+    }
+}
+
+void split_ip_port(const char *input, char **ip_address, char **port) {
+    char *colon_pos = strchr(input, ':');
+
+    if (colon_pos == NULL) {
+        // No port provided, treat entire input as IP
+        *ip_address = strdup(input);
+        *port       = NULL;
+    } else {
+        // Split IP and Port
+        size_t ip_len = colon_pos - input;
+        *ip_address = (char *)malloc(ip_len + 1);
+        strncpy(*ip_address, input, ip_len);
+        (*ip_address)[ip_len] = '\0';
+
+        *port = strdup(colon_pos + 1);
     }
 }
 
@@ -168,24 +200,34 @@ void receiver_receive(zsock_t* receiver_sock, const char* output_file_path) {
  * @param argv The array of command-line arguments.
  * @return An integer representing the exit status.
  */
-int receiver_main(int argc, char const* argv[]) {
-    if (argc < 4)
-    {
+int receiver_main(int argc, char *argv[], int mode) {
+    if (argc < 4) {
         printf("Usage: %s receiver [port] [threads] [output file path]\n", argv[0]);
         return 1;
     }
 
-    const char* port = argv[1];
-    int threads = atoi(argv[2]);
-    const char* output_file_path = argv[3];
+    // split the ip address and port number
+    const char *input = argv[1];  // IP:Port argument
+    printf("Input: %s\n", input);
 
-    printf("Connecting to sender at port %s...\n", port);
+    char *ip_address;
+    char *port;
+    split_ip_port(input, &ip_address, &port);
 
-    void* context = zmq_ctx_new();
+    printf("IP Address: %s\n", ip_address);
+    printf("Port: %s\n", port);
+
+    int        threads           = atoi(argv[2]);
+    const char *output_file_path = argv[3];
+
+    printf("Connecting to sender at ip:port %s:%s...\n", ip_address, port);
+
+    void *context = zmq_ctx_new();
     assert(context);
+    printf("Assert 1\n");
 
-    // Create and bind the PULL socket
-    zsock_t* receiver_sock = receiver(context, port, threads);
+    printf("Creating receiver socket\n");
+    zsock_t *receiver_sock = receiver(context, ip_address, port, threads);
     assert(receiver_sock);
 
     // Receive file
@@ -194,13 +236,15 @@ int receiver_main(int argc, char const* argv[]) {
     // return to normal colorr
     printf("\x1b[0m\n");
 
-    printf("Press Enter to exit.\n");
-    char x = getchar();
-    scanf("%c", &x) ? x : x;
-
     // Clean up
     zsock_destroy(&receiver_sock);
     zmq_ctx_destroy(&context);
+    free(ip_address);
+    free(port);
+
+    // Wait for user input before exiting
+    printf("Press Enter to exit.\n");
+    getchar();
 
     return 0;
 }

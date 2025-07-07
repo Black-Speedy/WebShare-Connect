@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <stdio.h>
@@ -11,9 +10,9 @@
 #include "common.h"
 //if on windows
 #ifdef _WIN32
-	#include <OpenSSL/ssl.h>
+        #include <OpenSSL/ssl.h>
 //if on linux
 #endif
 #ifdef __linux__
-	#include <openssl/ssl.h>
+        #include <openssl/ssl.h>
 #endif

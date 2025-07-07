@@ -1,0 +1,196 @@
+/**
+ * @file receiver_main.c
+ * @brief Main sender functionality.
+ */
+#include <stdio.h>
+#include "common.h"
+#include "sender.h"
+#include "sha512.h"
+#include "nice.h"
+#include <zmq.h>
+#include "../CLI/terminalProgressBar.h"
+
+
+/**
+ * @brief Struct representing file information.
+ */
+typedef struct {
+    // This is the header for the file
+    int64_t       file_size;
+    int           chunk_size;
+    unsigned char hash[SHA512_DIGEST_LENGTH];
+} file_header_t;
+
+/**
+ * @brief Sets up a sender socket.
+ *
+ * Initializes and binds a sender socket to the specified port.
+ *
+ * @param context The ZeroMQ context.
+ * @param port The port to bind the sender socket to.
+ * @param threads The number of threads to use.
+ * @return A pointer to the created sender socket.
+ */
+zsock_t* sender(void* context, const char *port, int threads)
+{
+    int io_threads = threads;
+    zmq_ctx_set(context, ZMQ_IO_THREADS, io_threads);
+    assert(zmq_ctx_get(context, ZMQ_IO_THREADS) == io_threads);
+
+    zsock_t* serv_sock = zsock_new(ZMQ_PAIR);
+    assert(serv_sock);
+
+    int rc = zsock_bind(serv_sock, "tcp://*:%s", port);
+    assert(rc != -1);
+
+    zsock_set_sndtimeo(serv_sock, 2000);     // 2s timeout for recv
+
+    return serv_sock;
+}
+
+/**
+ * @brief Sends a file via the sender socket.
+ *
+ * Reads the specified file, computes its hash, and sends it in chunks via the sender socket.
+ *
+ * @param serv_sock The sender socket to use for sending the file.
+ * @param file_path The path to the file to be sent.
+ */
+void sender_send(zsock_t* serv_sock, const char* file_path, int mode)
+{
+    // Open file
+    FILE* fp = fopen(file_path, "rb");
+    if (!fp) {
+        printf("Error: File open failed.\n");
+        return;
+    }
+
+    // Determine file size
+    fseek(fp, 0L, SEEK_END);
+    int64_t file_size;
+
+        #ifdef WIN32
+    file_size = _ftelli64(fp);
+        #else
+    file_size = ftell(fp);
+        #endif
+    rewind(fp);
+    if (file_size < 1) {
+        printf("Error: File size error.\n");
+        fclose(fp);
+        return;
+    }
+
+    printf("  File size: %lld bytes\n", file_size);
+
+    // Use get_chunk_size function from common.h
+    int chunk_size = get_chunk_size(file_size);
+
+    printf("  Chunk size: %d bytes\n", chunk_size);
+
+    // Compute hash
+    unsigned char hash[SHA512_DIGEST_LENGTH];
+    compute_sha512(file_path, hash);
+
+    file_header_t header;
+    header.file_size  = file_size;
+    header.chunk_size = chunk_size;
+    memcpy(header.hash, hash, SHA512_DIGEST_LENGTH);
+
+    printf("  Chunk size: %d bytes\n", chunk_size);
+
+    // Convert hash to hex string
+    char hash_string[SHA512_DIGEST_LENGTH * 2 + 1];
+    convert_hash_to_hex_string(hash, hash_string, SHA512_DIGEST_LENGTH);
+    printf("  Hash: %s\n", hash_string);
+
+    // Send file header
+    zsock_send(serv_sock, "b", &header, sizeof(header));
+
+    // Allocate buffer and send file
+    char* buffer = (char*)malloc(chunk_size);
+    if (!buffer) {
+        printf("Error: Memory allocation failed.\n");
+        fclose(fp);
+        return;
+    }
+
+    int64_t chunk_count   = file_size / (int64_t)chunk_size + (file_size % (int64_t)chunk_size != 0);
+    int     current_chunk = 0;
+    printf("  Total chunks to send: %lld\n", chunk_count);
+
+    int is_complete = 0;
+    while (1) {
+        memset(buffer, 0, chunk_size);
+        size_t bytesRead = fread(buffer, 1, chunk_size, fp);
+        if (bytesRead == 0) {
+            if (ferror(fp)) perror("Error reading file");
+            is_complete = 1;             // Mark as complete if finished reading
+            break;
+        }
+        zsock_send(serv_sock, "b", buffer, bytesRead);
+
+        current_chunk++;
+        int percentage = (int)((current_chunk * 100) / chunk_count);
+        printProgressBar(percentage, current_chunk, chunk_count, is_complete);
+
+        char* ack = zstr_recv(serv_sock);
+        if (!ack) {
+            fprintf(stderr, "Failed to receive acknowledgment: %s\n", zmq_strerror(errno));
+            break;
+        }
+        if (strcmp(ack, "ACK") != 0) {
+            fprintf(stderr, "Received incorrect acknowledgment\n");
+            free(ack);
+            break;
+        }
+        free(ack);
+    }
+
+    // Final display with completion
+    if (mode == CLI) {
+        printProgressBar(100, current_chunk, chunk_count, 1); // Green color on completion
+    }
+    printf("\n");                                         // Move to new line after completion
+
+    free(buffer);
+    fclose(fp);
+}
+
+
+/**
+ * @brief The main function for the sender.
+ *
+ * Initializes the ZeroMQ context, creates a sender socket, and sends a file via the socket.
+ *
+ * @param argc The number of command-line arguments.
+ * @param argv The array of command-line arguments.
+ * @return An integer representing the exit status.
+ */
+int sender_main(int argc, char *argv[], int mode) {
+    if (argc < 4) {
+        printf("Usage: %s sender [port] [threads] [file_path]\n", argv[-1]);
+        return 1;
+    }
+
+    const char* port      = argv[1];
+    int         threads   = atoi(argv[2]);
+    const char* file_path = argv[3];
+    printf("Port: %s\nThreads: %d\nFile path: %s\n", port, threads, file_path);
+
+    void* context = zmq_ctx_new();
+    assert(context);
+
+    // Create and bind the PUSH socket
+    zsock_t* serv_sock = sender(context, port, threads);
+    assert(serv_sock);
+
+    // Send the file
+    sender_send(serv_sock, file_path, mode);
+
+    // Clean up
+    zsock_destroy(&serv_sock);
+    zmq_ctx_destroy(&context);
+
+    return 0;
+}

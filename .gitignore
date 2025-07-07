@@ -51,10 +51,17 @@ Module.symvers
 Mkfile.old
 dkms.conf
 
-
+# Build directories
 .vs/
+.vscode/
 out/
+compiled/
 build/
+builds/
 buildWindows/
 buildLinux/
 Documentation/
+
+# Cache
+CMakeCache.txt
+CMakeFiles/
