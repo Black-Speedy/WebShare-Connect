@@ -11,8 +11,8 @@
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "F:/packagemanagers/vcpkg/scripts/buildsystems/vcpkg.cmake",
                 "CMAKE_MAKE_PROGRAM": "F:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-                "CMAKE_C_COMPILER": "clang.exe",
-                "CMAKE_CXX_COMPILER": "clang++.exe"
+                "CMAKE_C_COMPILER": "clang-cl.exe",
+                "CMAKE_CXX_COMPILER": "clang-cl.exe"
             },
             "condition": {
                 "type": "equals",
