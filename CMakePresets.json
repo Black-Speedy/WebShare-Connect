@@ -10,7 +10,9 @@
             },
             "cacheVariables": {
                 "CMAKE_TOOLCHAIN_FILE": "F:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "CMAKE_MAKE_PROGRAM": "F:/Programs/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe"
+                "CMAKE_MAKE_PROGRAM": "F:/Programs/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
+                "CMAKE_C_COMPILER": "clang-cl.exe",
+                "CMAKE_CXX_COMPILER": "clang-cl.exe"
             },
             "condition": {
                 "type": "equals",
@@ -20,6 +22,7 @@
         },
         {
             "name": "x64-debug-win",
+
             "displayName": "x64 Debug Windows",
             "inherits": "windows-base",
             "binaryDir": "${sourceDir}/compiled/build/${presetName}",
@@ -30,6 +33,9 @@
             },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug"
+            },
+            "environment": {
+              "QT_QPA_PLATFORM_PLUGIN_PATH": "F:/Tools/vcpkg/packages/qtbase_x64-windows/debug/Qt6/plugins/platforms"
             }
         },
         {

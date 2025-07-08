@@ -1,0 +1,120 @@
+/* === GENERAL === */
+QWidget {
+    background-color: #f6f9fc;
+    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+    font-size: 10.5pt;
+    color: #222;
+}
+
+/* === TABS === */
+QTabWidget::pane {
+    border: none;
+    background-color: transparent;
+    margin-top: 8px;
+}
+
+QTabBar::tab {
+    background: #ffffff;
+    padding: 6px 14px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px 8px 0 0;
+    margin-right: 4px;
+}
+
+QTabBar::tab:selected {
+    background: #e3eefd;
+    font-weight: bold;
+    border-bottom: 1px solid #f6f9fc;
+}
+
+/* === GROUP BOX === */
+QGroupBox {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    margin-top: 12px;
+    background-color: #ffffff;
+}
+
+QGroupBox:title {
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    padding: 4px 10px;
+    font-weight: bold;
+}
+
+/* === PUSH BUTTONS === */
+QPushButton {
+    background-color: #444cf7;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 8px;
+}
+
+QPushButton:hover {
+    background-color: #3b42d2;
+}
+
+QPushButton:disabled {
+    background-color: #cccccc;
+    color: #777;
+}
+
+/* === FILE DROP AREA (could be a QLabel) === */
+QLabel#DropZone {
+    border: 2px dashed #ccc;
+    border-radius: 12px;
+    padding: 40px;
+    background-color: #ffffff;
+    color: #888;
+    qproperty-alignment: AlignCenter;
+}
+
+/* === INPUTS === */
+QLineEdit, QComboBox {
+    border: 1px solid #ccc;
+    padding: 6px 10px;
+    border-radius: 6px;
+    background-color: #fff;
+}
+
+QLineEdit:focus, QComboBox:focus {
+    border: 1px solid #888;
+}
+
+/* === SLIDERS, PROGRESS === */
+QProgressBar {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+    height: 18px;
+    text-align: center;
+}
+
+QProgressBar::chunk {
+    background-color: #222;
+    border-radius: 5px;
+}
+
+/* === TOGGLE SWITCH (emulated as checkbox) === */
+QCheckBox::indicator {
+    width: 40px;
+    height: 20px;
+}
+
+QCheckBox::indicator:unchecked {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #ddd;
+}
+
+QCheckBox::indicator:checked {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #444cf7;
+}
+
+/* === TEXT === */
+QLabel {
+    color: #333;
+}
