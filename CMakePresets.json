@@ -38,13 +38,10 @@
         {   "name": "matlin",
             "hidden": true,
             "environment": {
-                "VCPKG_ROOT": "",
-                "CMAKE_TOOLCHAIN_FILE": "/ninja",
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++"
             },
             "cacheVariables": {
-                "CMAKE_MAKE_PROGRAM": "/ninja.exe",
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++"
             }
@@ -124,10 +121,6 @@
             "name": "linux-base",
             "inherits": "matlin",
             "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang",
-                "CMAKE_CXX_COMPILER": "clang++"
-            },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",

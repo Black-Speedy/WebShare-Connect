@@ -1,0 +1,10 @@
+# Official packages
+zeromq
+openssl
+libnice
+libsodium
+qt6-base
+qt6-declarative
+
+# AUR packages
+aur:czmq
