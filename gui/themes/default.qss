@@ -1,120 +1,63 @@
-/* === GENERAL === */
+/* ===== GLOBAL STYLES ===== */
 QWidget {
-    background-color: #f6f9fc;
-    font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
-    font-size: 10.5pt;
-    color: #222;
+    font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
+    font-size: 14px;
 }
 
-/* === TABS === */
-QTabWidget::pane {
-    border: none;
-    background-color: transparent;
-    margin-top: 8px;
-}
-
-QTabBar::tab {
-    background: #ffffff;
-    padding: 6px 14px;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px 8px 0 0;
-    margin-right: 4px;
-}
-
-QTabBar::tab:selected {
-    background: #e3eefd;
-    font-weight: bold;
-    border-bottom: 1px solid #f6f9fc;
-}
-
-/* === GROUP BOX === */
-QGroupBox {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    margin-top: 12px;
-    background-color: #ffffff;
-}
-
-QGroupBox:title {
-    subcontrol-origin: margin;
-    subcontrol-position: top left;
-    padding: 4px 10px;
-    font-weight: bold;
-}
-
-/* === PUSH BUTTONS === */
-QPushButton {
-    background-color: #444cf7;
-    color: white;
-    padding: 10px 16px;
-    border: none;
-    border-radius: 8px;
-}
-
-QPushButton:hover {
-    background-color: #3b42d2;
-}
-
-QPushButton:disabled {
-    background-color: #cccccc;
-    color: #777;
-}
-
-/* === FILE DROP AREA (could be a QLabel) === */
-QLabel#DropZone {
-    border: 2px dashed #ccc;
+QMainWindow {
     border-radius: 12px;
-    padding: 40px;
-    background-color: #ffffff;
-    color: #888;
-    qproperty-alignment: AlignCenter;
+    padding: 16px;
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #faf5ff,
+        stop: 0.5 #f5f3ff,
+        stop: 1 #e0e7ff
+    );
 }
 
-/* === INPUTS === */
-QLineEdit, QComboBox {
-    border: 1px solid #ccc;
-    padding: 6px 10px;
+#cardFrame {
+    background-color: white;
+    border: 1px solid #f3e8ff;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+QLabel#headerSend,
+QLabel#headerReceive {
+    font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    color: #111111;
+}
+
+QPushButton#settingButton {
+    color: #8b5cf6;
+    background-color: transparent;
+    border: 1px solid #8b5cf6;
     border-radius: 6px;
-    background-color: #fff;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-family: "Segoe UI", sans-serif;
 }
 
-QLineEdit:focus, QComboBox:focus {
-    border: 1px solid #888;
+/* Hover State */
+QPushButton#settingButton:hover {
+    color: #7c3aed;
+    border: 1px solid #7c3aed;
 }
 
-/* === SLIDERS, PROGRESS === */
-QProgressBar {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    background-color: #f1f1f1;
-    height: 18px;
-    text-align: center;
+QPushButton#sendButton, QPushButton#receiveButton { /* non selected button */
+    background-color: #f3f0ff;
+    color: #8b5cf6;
+    border: 1px solid #8b5cf6;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
 }
 
-QProgressBar::chunk {
-    background-color: #222;
-    border-radius: 5px;
-}
-
-/* === TOGGLE SWITCH (emulated as checkbox) === */
-QCheckBox::indicator {
-    width: 40px;
-    height: 20px;
-}
-
-QCheckBox::indicator:unchecked {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #ddd;
-}
-
-QCheckBox::indicator:checked {
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    background-color: #444cf7;
-}
-
-/* === TEXT === */
-QLabel {
-    color: #333;
+QPushButton#sendButton:checked, QPushButton#receiveButton:checked { /* Selected button */
+    background-color: #8b5cf6;
+    font-weight: bold;
+    color: white;
 }

@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/">
         <file>themes/default.qss</file>
+        <file>icons/send.svg</file>
+        <file>icons/settings.svg</file>
     </qresource>
 </RCC>
