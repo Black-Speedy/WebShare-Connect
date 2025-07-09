@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include "core.h"
+#include "handlearguments.h"
 
-int main()
+int main(int argc, char *argv[], char *envp[])
 {
-    printf("Hello from WSC!\n");
-    core_test();
+    printf("Testig command line options:\n");
+    int result = handle_cli_arguments(argc-1, argv + 1);
+
+    // core_test();
     return 0;
 }
