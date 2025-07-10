@@ -37,10 +37,6 @@
         },
         {   "name": "matlin",
             "hidden": true,
-            "environment": {
-                "CMAKE_C_COMPILER": "clang",
-                "CMAKE_CXX_COMPILER": "clang++"
-            },
             "cacheVariables": {
                 "CMAKE_C_COMPILER": "clang",
                 "CMAKE_CXX_COMPILER": "clang++"
@@ -121,6 +117,7 @@
             "name": "linux-base",
             "inherits": "matlin",
             "hidden": true,
+            "generator": "Ninja",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",

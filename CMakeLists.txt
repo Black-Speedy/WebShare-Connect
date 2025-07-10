@@ -121,7 +121,7 @@ install(TARGETS WebShare-Connect
 )
 
 configure_file(
-    # ${CMAKE_SOURCE_DIR}/core/version.h.in
+    ${CMAKE_SOURCE_DIR}/core/version.h.in
     ${CMAKE_BINARY_DIR}/core/version.h
     @ONLY
 )

@@ -42,10 +42,19 @@ char *format_options() {
     result[0] = '\0';
 
     for (size_t i = 0; i < count; ++i) {
+        #ifdef _WIN32
         if (strcat_s(result, total_length + 1, options[i]) != 0) {
             free(result);
             return NULL;
         }
+        #else
+        // Linux/macOS: use strncat with length check
+        if (strlen(result) + strlen(options[i]) >= total_length + 1) {
+            free(result);
+            return NULL; // overflow would occur
+        }
+        strncat(result, options[i], total_length - strlen(result));
+        #endif
     }
 
     return result;
