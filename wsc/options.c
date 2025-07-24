@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "version.h"
 #include <stdint.h>
+#include "variables.h"
+#include "errorcodes.h"
 
 char *options[] = {
     "Usage: wsc [options]\n",
@@ -19,10 +21,28 @@ char *options[] = {
 int help_handler(const char *arg);
 int version_handler(const char *arg);
 
+static char ipDescription[100];
+__attribute__((constructor))
+static void init_ipDescription() {
+    snprintf(ipDescription, sizeof(ipDescription),
+             "Set the IP address or domain name (default: %s)", DEFAULT_IP);
+}
 
-static const OptionContext option_contexts[] = {
+static char portDescription[100];
+__attribute__((constructor))
+static void init_portDescription() {
+    snprintf(portDescription, sizeof(portDescription),
+             "Set the port number (default: %d)", DEFAULT_PORT);
+}
+
+const OptionContext option_contexts[] = {
     {"-h", "--help", "Show this help message", 0, help_handler},
-    {"-v", "--version", "Some Version", 0, version_handler}
+    {"-ip", "--ip-address", ipDescription, 0, NULL},
+    {"-p", "--port", portDescription, 1, NULL},
+    {"-V", "--verbose", "Enable verbose output", 0, NULL},
+    {"-c", "--config", "Specify configuration file", 1, NULL},
+    {"-v", "--version", "Some Version", 0, version_handler},
+    {"-V", "--verbose", "Enable verbose output", 0, NULL}
 };
 
 const OptionContext *getOptions() {
@@ -36,6 +56,8 @@ const size_t getOptionsCount() {
     return divided;
 }
 
+
+#define DESCRIPTION_COLUMN 30  // Column where description should start
 /**
  * Format the options into a single string.
  * This function concatenates the options array into a single string
@@ -44,36 +66,30 @@ char *format_options(OptionContext option) {
     const char *short_op = option.short_opt;
     const char *long_op = option.long_opt;
     const char *description_op = option.description;
-    int expects_argument = option.expects_argument;
-    int (*handler)(const char *) = option.handler;
-    
-    const int tab_size = 3; // Number of spaces for alignment
-    const int formatting_between_options_length = 3;
-    const int description_space_length = 17; // Length of the description field
-    
-    const char *tab = "   ";
-    const char *formatting_between_options = " | ";
-    const char *description_space = "                 ";
-    
-    size_t prefix_len = strlen(short_op) +
-                        strlen(long_op) +
-                        strlen(description_op) +
-                        strlen(tab) +
-                        strlen(formatting_between_options) +
-                        description_space_length +
-                        1; // null terminator
 
-    char *prefix = malloc(prefix_len);
-    
-    sprintf(prefix, "%s%s%s%s%-*s%s",
-    tab,
-    short_op,
-    formatting_between_options,
-    long_op,
-    description_space_length, "", // width = description_space_length, fill with ""
-    description_op);
-    
-    return prefix;
+    const char *tab = "   ";
+    const char *between = " | ";
+
+    size_t option_text_len = strlen(tab) + strlen(short_op) + strlen(between) + strlen(long_op);
+    size_t padding_len = (DESCRIPTION_COLUMN > option_text_len)
+                         ? DESCRIPTION_COLUMN - option_text_len
+                         : 1;  // At least one space
+
+    size_t total_len = option_text_len + padding_len + strlen(description_op) + 1;
+
+    char *line = malloc(total_len);
+    if (!line) return NULL;
+
+    sprintf(line, "%s%s%s%s%*s%s",
+        tab,
+        short_op,
+        between,
+        long_op,
+        (int)padding_len, " ",  // pad to align
+        description_op
+    );
+
+    return line;
 }
 
 int help_handler(const char *arg) {
@@ -90,5 +106,24 @@ int help_handler(const char *arg) {
 
 int version_handler(const char *arg) {
     printf("WebShare-Connect Version: %s\n", PROJECT_VERSION);
+    return 0;
+}
+
+int port_handler(const char *arg) {
+    if (arg == NULL) {
+        fprintf(stderr, "Error: Port requires a value.\n");
+        return ERR_PORT_MISSING_VALUE;
+    }
+    
+    int port = atoi(arg);
+    if (port <= 0 || port > 65535) {
+        fprintf(stderr, "Error: Invalid port number '%s'. Must be between 1 and 65535.\n", arg);
+        return ERR_INVALID_PORT;
+    }
+    
+    // Set the port in the application context (not shown here)
+    PORT = port; // Assuming DEFAULT_PORT is a global variable
+    
+    printf("Port set to %d\n", port);
     return 0;
 }

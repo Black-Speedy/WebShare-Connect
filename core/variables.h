@@ -1,3 +1,11 @@
+#ifndef VARIABLES_H
+#define VARIABLES_H
+
 #include <stdint.h>
-uint16_t PORT    = 54832;          // Default port generally not used by any other service
-uint8_t  IPV4[4] = {127, 0, 0, 1}; // Default IP address
+
+extern const uint16_t DEFAULT_PORT;
+extern const uint8_t IPV4[4];
+extern const char* DEFAULT_IP;
+extern uint16_t PORT; // Current port, can be modified at runtime
+
+#endif // VARIABLES_H

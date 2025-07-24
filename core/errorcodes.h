@@ -1,16 +1,23 @@
-// general errors:
-const int NoInputProvided      = -0x000001; // Error code for no input provided
-const int InvalidInputProvided = -0x000002; // Error code for invalid input provided
+// errorcodes.h
+#ifndef ERRORCODES_H
+#define ERRORCODES_H
 
-// port errors:
-const int InvalidPortNumber       = -0x000011; // Error code for invalid port number
-const int PortOptionRequiresValue = -0x000012; // Error code for port option requiring a value
+typedef enum {
+    // General errors
+    ERR_NO_INPUT           = -0x000001,
+    ERR_INVALID_INPUT      = -0x000002,
+    ERR_NO_HANDLER         = -0x000003,
 
-// ip adress errors:
-const int InvalidIPAdress             = -0x000111; // Error code for invalid IP address
-const int InvalidIPV4Adress           = -0x000112; // Error code for invalid IP address
-const int InvalidIPV6Adress           = -0x000113; // Error code for invalid IPv6 address
-const int IPAdressOptionRequiresValue = -0x000114; // Error code for IP address option requiring
+    // Port-related errors
+    ERR_INVALID_PORT       = -0x000011,
+    ERR_PORT_MISSING_VALUE = -0x000012,
 
-//
-const int NoHandler = -0x000003; // Error code for invalid input provided
+    // IP-related errors
+    ERR_INVALID_IP         = -0x000111,
+    ERR_INVALID_IPV4       = -0x000112,
+    ERR_INVALID_IPV6       = -0x000113,
+    ERR_IP_MISSING_VALUE   = -0x000114
+
+} ErrorCode;
+
+#endif // ERRORCODES_H

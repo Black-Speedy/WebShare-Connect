@@ -28,6 +28,6 @@ int format_desctription_call_handler(OptionContext option);
 const OptionContext *getOptions();
 const size_t getOptionsCount();
 
-char *format_options();
+char *format_options(OptionContext option);
 
 #endif // OPTIONS_H
