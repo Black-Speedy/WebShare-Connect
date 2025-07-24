@@ -1,0 +1,50 @@
+name: Optimized CI
+
+on:
+  push:
+    branches: [ master, redo ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  VCPKG_ROOT: C:\vcpkg
+  VCPKG_DEFAULT_TRIPLET: x64-windows
+
+jobs:
+  test:
+    runs-on: windows-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+
+    # Setup vcpkg with caching
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
+      with:
+        vcpkgDirectory: ${{ env.VCPKG_ROOT }}
+        vcpkgGitCommitId: '2024.07.12'
+        vcpkgJsonGlob: 'vcpkg.json'
+
+    # Configure and build with vcpkg integration
+    - name: Configure and Build
+      uses: lukka/run-cmake@v10
+      with:
+        configurePreset: 'default'
+        buildPreset: 'default'
+        configurePresetAdditionalArgs: >
+          -DCMAKE_BUILD_TYPE=Release
+          -DBUILD_TESTS=ON
+
+    # Run tests
+    - name: Run tests
+      working-directory: build
+      run: ctest --output-on-failure --parallel 2
+
+    # Upload artifacts
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results
+        path: |
+          build/Testing/Temporary/LastTest.log
