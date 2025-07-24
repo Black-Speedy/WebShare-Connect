@@ -5,6 +5,7 @@ set(PROJECT_VERSION_MINOR 0)
 set(PROJECT_VERSION_PATCH 1)
 set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
 
+option(BUILD_TESTS "Build the tests" ON)
 
 project(WebShare-Connect 
         VERSION ${PROJECT_VERSION} 
@@ -129,3 +130,11 @@ configure_file(
 add_subdirectory(core)
 add_subdirectory(wsc)
 add_subdirectory(gui)
+
+# Add tests if enabled
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
+
+target_link_libraries(WebShare-Connect PRIVATE core)

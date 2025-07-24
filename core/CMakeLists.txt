@@ -4,6 +4,10 @@ project(core LANGUAGES C)
 add_library(core
     core.c
     core.h
+    cthreads.c
+    cthreads.h
+    jobqueue.c
+    jobqueue.h
 )
 
 target_link_libraries(core PRIVATE libzmq)

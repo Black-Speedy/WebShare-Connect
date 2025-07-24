@@ -44,7 +44,7 @@
         },
         {
             "name": "windows-base",
-            "inherits": "matwin",
+            "inherits": "mikwin",
             "hidden": true,
             "generator": "Ninja",
             "condition": {
@@ -55,7 +55,6 @@
         },
         {
             "name": "x64-debug-win",
-
             "displayName": "x64 Debug Windows",
             "inherits": "windows-base",
             "binaryDir": "${sourceDir}/compiled/build/${presetName}",
@@ -191,6 +190,19 @@
                 "CMAKE_BUILD_TYPE": "Debug",
                 "CMAKE_TOOLCHAIN_FILE": "",
                 "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        },
+        {
+            "name": "ci",
+            "displayName": "CI Build",
+            "description": "Build configuration for GitHub Actions CI",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_TESTS": "ON"
             }
         }
     ]

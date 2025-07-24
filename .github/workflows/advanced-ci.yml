@@ -1,0 +1,116 @@
+name: Advanced CI
+
+on:
+  push:
+    branches: [ master, redo ]
+  pull_request:
+    branches: [ master ]
+
+env:
+  VCPKG_ROOT: C:\vcpkg
+
+jobs:
+  test:
+    strategy:
+      matrix:
+        os: [windows-latest]
+        build_type: [Debug, Release]
+        include:
+          - os: windows-latest
+            triplet: x64-windows
+    
+    runs-on: ${{ matrix.os }}
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        submodules: true
+
+    # Restore vcpkg from cache or install it
+    - name: Cache vcpkg
+      id: cache-vcpkg
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.VCPKG_ROOT }}
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('requirementsWindows.txt') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-
+
+    # Install vcpkg if not cached
+    - name: Install vcpkg
+      if: steps.cache-vcpkg.outputs.cache-hit != 'true'
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git ${{ env.VCPKG_ROOT }}
+        ${{ env.VCPKG_ROOT }}\bootstrap-vcpkg.bat
+
+    # Always integrate vcpkg
+    - name: Integrate vcpkg
+      run: ${{ env.VCPKG_ROOT }}\vcpkg integrate install
+
+    # Cache installed packages separately for faster incremental builds
+    - name: Cache vcpkg packages
+      uses: actions/cache@v4
+      with:
+        path: |
+          ${{ env.VCPKG_ROOT }}\installed
+          ${{ env.VCPKG_ROOT }}\packages
+        key: vcpkg-packages-${{ runner.os }}-${{ matrix.triplet }}-${{ hashFiles('requirementsWindows.txt', 'CMakeLists.txt') }}
+        restore-keys: |
+          vcpkg-packages-${{ runner.os }}-${{ matrix.triplet }}-
+
+    # Install dependencies
+    - name: Install dependencies
+      run: |
+        ${{ env.VCPKG_ROOT }}\vcpkg install --triplet ${{ matrix.triplet }} `
+          zeromq czmq openssl libnice `
+          qt6[core,widgets,network,concurrent,gui]
+
+    # Cache CMake build directory
+    - name: Cache CMake build
+      uses: actions/cache@v4
+      with:
+        path: build
+        key: cmake-${{ runner.os }}-${{ matrix.build_type }}-${{ hashFiles('**/CMakeLists.txt', 'core/**', 'gui/**', 'wsc/**', 'tests/**') }}
+        restore-keys: |
+          cmake-${{ runner.os }}-${{ matrix.build_type }}-
+
+    # Configure CMake
+    - name: Configure CMake
+      run: |
+        cmake -B build -S . `
+          -DCMAKE_TOOLCHAIN_FILE=${{ env.VCPKG_ROOT }}\scripts\buildsystems\vcpkg.cmake `
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} `
+          -DBUILD_TESTS=ON `
+          -DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}
+
+    # Build
+    - name: Build
+      run: cmake --build build --config ${{ matrix.build_type }} --parallel
+
+    # Run tests
+    - name: Run tests
+      working-directory: build
+      run: |
+        ctest --output-on-failure --build-config ${{ matrix.build_type }} --parallel 2
+
+    # Upload test artifacts on failure
+    - name: Upload test logs on failure
+      if: failure()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-logs-${{ matrix.os }}-${{ matrix.build_type }}
+        path: |
+          build/Testing/Temporary/
+          build/tests/*.exe
+
+    # Upload build artifacts
+    - name: Upload executables
+      if: matrix.build_type == 'Release'
+      uses: actions/upload-artifact@v4
+      with:
+        name: executables-${{ matrix.os }}
+        path: |
+          build/WebShare-Connect.exe
+          build/gui/gui.exe
+          build/wsc/wsc.exe
