@@ -44,7 +44,7 @@
         },
         {
             "name": "windows-base",
-            "inherits": "matwin",
+            "inherits": "mikwin",
             "hidden": true,
             "generator": "Ninja",
             "condition": {
@@ -55,7 +55,6 @@
         },
         {
             "name": "x64-debug-win",
-
             "displayName": "x64 Debug Windows",
             "inherits": "windows-base",
             "binaryDir": "${sourceDir}/compiled/build/${presetName}",

@@ -145,3 +145,5 @@ CMakeLists.txt.user*
 .vscode-test/
 
 CMakeFiles/
+
+*.cfg
