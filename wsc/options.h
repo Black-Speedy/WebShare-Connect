@@ -1,3 +1,5 @@
+#ifndef OPTIONS_H
+#define OPTIONS_H
 #include <stdio.h>
 #include <string.h>
 // char *options[] = {
@@ -10,52 +12,22 @@
 //     "\t--verbose | -V        Enable verbose output\n",
 //     "\t--config | -c <file>        Specify configuration file\n"
 // };
+typedef struct OptionContext {
+    const char *short_opt;
+    const char *long_opt;
+    const char *description;
+    int expects_argument;             // 0 or 1
+    int (*handler)(const char *arg);  // NULL if no handler
+} OptionContext;
 
 
-char *options[] = {
-    "Usage: wsc [options]\n",
-    "Options:\n",
-    "   -h  | --help                 Show this help message\n",
-    "   -ip | --ip-adress <address>  Set the IP address or domain name (default: 127.0.0.1)\n",
-    "   -p  | --port <port>          Set the port number (default: 54832)\n",
-    "   -v  | --version              Show version information\n",
-    "   -V  | --verbose              Enable verbose output\n",
-    "   -c  | --config <file>        Specify configuration file\n",
-    "\n  Example: wsc --port 8080 --ip-adress 1.1.1.1\n"
-};
+int help_handler(const char *arg);
 
-/**
- * Format the options into a single string.
- * This function concatenates the options array into a single string
- */
-char *format_options() {
-    size_t total_length = 0;
-    size_t count = sizeof(options) / sizeof(options[0]);
+int format_desctription_call_handler(OptionContext option);
 
-    for (size_t i = 0; i < count; ++i) {
-        total_length += strlen(options[i]);
-    }
+const OptionContext *getOptions();
+const size_t getOptionsCount();
 
-    char *result = malloc(total_length + 1);
-    if (!result) return NULL;
+char *format_options();
 
-    result[0] = '\0';
-
-    for (size_t i = 0; i < count; ++i) {
-        #ifdef _WIN32
-        if (strcat_s(result, total_length + 1, options[i]) != 0) {
-            free(result);
-            return NULL;
-        }
-        #else
-        // Linux/macOS: use strncat with length check
-        if (strlen(result) + strlen(options[i]) >= total_length + 1) {
-            free(result);
-            return NULL; // overflow would occur
-        }
-        strncat(result, options[i], total_length - strlen(result));
-        #endif
-    }
-
-    return result;
-}
+#endif // OPTIONS_H

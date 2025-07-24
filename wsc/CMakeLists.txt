@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.16)
 
 add_executable(wsc main.c
                handlearguments.c
+               options.c
 
 )
 
@@ -20,4 +21,3 @@ install(TARGETS wsc
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
