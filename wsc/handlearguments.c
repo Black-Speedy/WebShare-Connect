@@ -11,7 +11,7 @@
 #include "options.h"
 
 int handle_cli_argument_smart(char *input_option, char *value[], const OptionContext options[]) {
-    for (int i = 0; i < getOptionsCount(); i++) {
+    for (size_t i = 0; i < getOptionsCount(); i++) {
         const OptionContext current_option = options[i];
         if (current_option.handler == NULL) {
             // Skip options without a handler
@@ -34,23 +34,27 @@ int handle_cli_argument_smart(char *input_option, char *value[], const OptionCon
 }
 
 int handle_cli_arguments(int count, char *arguments[]) {
+    const OptionContext *options;
     if (count < 1) {
         // can be changed later if we want different behavior
         fprintf(stderr, "Error: No option provided. Use -h or --help for options.\n");
         return ERR_NO_INPUT;
     }
 
-    const OptionContext *options = getOptions();
-    for (int i = 0; i < count+1; i++) {
-        char *arg = arguments[i];
-        // Check if the argument is NULL or empty (for perfomance)
-        if (arg == NULL || strlen(arg) == 0) {
+    options = getOptions();
+    for (int i = 0; i < count; i++) {
+        char *argument;
+        char **value;
+        int result;
+        argument = arguments[i];
+        // Check if the argument is NULL or empty (for perfomance) and we know we have at least one argument
+        if (argument == NULL || strlen(argument) == 0) {
             return 0;
         }
-        char **value = arguments + i + 1; // Get the next argument as the value
+        value = arguments + i + 1; // Get the next argument as the value
         // printf("Processing argument: %s\n", arg);
         // printf("Value: %s\n", *value ? *value : "NULL");
-        int result = handle_cli_argument_smart(arg, value, options);
+        result = handle_cli_argument_smart(argument, value, options);
         if (result < 0) {
             return result;
         }

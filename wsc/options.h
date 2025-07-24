@@ -15,18 +15,29 @@
 typedef struct OptionContext {
     const char *short_opt;
     const char *long_opt;
+    const char *usage;
     const char *description;
     int expects_argument;             // 0 or 1
     int (*handler)(const char *arg);  // NULL if no handler
 } OptionContext;
 
+extern const OptionContext option_contexts[];
 
 int help_handler(const char *arg);
 
+int version_handler(const char *arg);
+
+int port_handler(const char *arg);
+
+static void init_ipDescription(void);
+
+static void init_portDescription(void);
+
+
 int format_desctription_call_handler(OptionContext option);
 
-const OptionContext *getOptions();
-const size_t getOptionsCount();
+const OptionContext *getOptions(void);
+size_t getOptionsCount(void);
 
 char *format_options(OptionContext option);
 
