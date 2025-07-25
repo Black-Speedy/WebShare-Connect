@@ -40,7 +40,7 @@ static void init_portDescription() {
 const OptionContext option_contexts[] = {
     {"-h",  "--help",       NULL,        "Show this help message",     0, help_handler},
     {"-ip", "--ip-address", "<address>", ipDescription,                0, NULL},
-    {"-p",  "--port",       "<port>",    portDescription,              1, NULL},
+    {"-p",  "--port",       "<port>",    portDescription,              1, port_handler},
     {"-V",  "--verbose",    NULL,        "Enable verbose output",      0, NULL},
     {"-c",  "--config",     "<file>",    "Specify configuration file", 1, NULL},
     {"-v",  "--version",    NULL,        "Some Version",               0, version_handler},
@@ -111,7 +111,7 @@ char *format_options(OptionContext option) {
 
 int help_handler(const char *_) {
     for (size_t i = 0; i < getOptionsCount(); i++) {
-        if (getOptions()[i].usage == NULL) {
+        if (getOptions()[i].handler == NULL) {
             continue;  // Skip options without usage
         }
         char *formatted = format_options(getOptions()[i]);
@@ -130,10 +130,12 @@ int version_handler(const char *_) {
 }
 
 int port_handler(const char *arg) {
+    printf("We are in port_handler\n");
     if (arg == NULL) {
         fprintf(stderr, "Error: Port requires a value.\n");
         return ERR_PORT_MISSING_VALUE;
     }
+    printf("Setting port to: %s\n", arg);
     
     int port = atoi(arg);
     if (port <= 0 || port > 65535) {
@@ -145,5 +147,5 @@ int port_handler(const char *arg) {
     PORT = (uint16_t)port; // Assuming DEFAULT_PORT is a global variable
     
     printf("Port set to %d\n", port);
-    return 0;
+    return 1; //Number of arguments consumed
 }
