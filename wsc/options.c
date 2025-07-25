@@ -18,8 +18,8 @@
 //     "   -c  | --config <file>        Specify configuration file\n",
 //     "\n  Example: wsc --port 8080 --ip-adress 1.1.1.1\n"
 // };
-int help_handler(const char *arg);
-int version_handler(const char *arg);
+int help_handler(const char *arg[]);
+int version_handler(const char *arg[]);
 
 static char ipDescription[100];
 // is a constructor
@@ -109,7 +109,7 @@ char *format_options(OptionContext option) {
     return line;
 }
 
-int help_handler(const char *_) {
+int help_handler(const char *_[]) {
     for (size_t i = 0; i < getOptionsCount(); i++) {
         if (getOptions()[i].handler == NULL) {
             continue;  // Skip options without usage
@@ -124,13 +124,16 @@ int help_handler(const char *_) {
 }
 
 
-int version_handler(const char *_) {
+int version_handler(const char *_[]) {
     printf("WebShare-Connect Version: %s\n", PROJECT_VERSION);
     return 0;
 }
 
-int port_handler(const char *arg) {
+int port_handler(const char *args[]) {
     printf("We are in port_handler\n");
+    printf("We are in port_handler\n");
+    printf("Argument received: %s\n", args[0]);
+    const char *arg = args[0];
     if (arg == NULL) {
         fprintf(stderr, "Error: Port requires a value.\n");
         return ERR_PORT_MISSING_VALUE;

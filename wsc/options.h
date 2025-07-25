@@ -8,17 +8,17 @@ typedef struct OptionContext {
     const char *long_opt;
     const char *usage;                // Usage string, can be NULL if no input is expected
     const char *description;
-    int expects_argument;
-    int (*handler)(const char *arg);  // NULL if no handler
+    size_t expects_argument;
+    int (*handler)(const char *arg[]);  // NULL if no handler
 } OptionContext;
 
 extern const OptionContext option_contexts[];
 
-int help_handler(const char *arg);
+int help_handler(const char *arg[]);
 
-int version_handler(const char *arg);
+int version_handler(const char *arg[]);
 
-int port_handler(const char *arg);
+int port_handler(const char *arg[]);
 
 static void init_ipDescription(void);
 

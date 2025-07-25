@@ -11,7 +11,6 @@
 #include "options.h"
 
 int handle_cli_argument_smart(char *input_option, char *rest_of_input[], const OptionContext options[]) {
-    char *input_for_option;
     int handler_result;
     size_t count = getOptionsCount();
     // Rest of input is a pointer to the next argument after the option
@@ -21,18 +20,19 @@ int handle_cli_argument_smart(char *input_option, char *rest_of_input[], const O
             // Skip options without a handler
             continue;
         }
+        const char *input_for_option[current_option.expects_argument + 1]; // +1 for NULL terminator
         for (size_t j = 0; j < current_option.expects_argument; j++) {
             // Get the next argument if it exists
             if (i + j + 1 < count) {
-                input_for_option = rest_of_input[j];
+                input_for_option[j] = rest_of_input[j];
             } else {
-                input_for_option = NULL;  // No more arguments available
+                input_for_option[j] = NULL;  // No more arguments available
             }
         }
 
         if (strcmp(input_option, current_option.short_opt) == 0 || strcmp(input_option, current_option.long_opt) == 0) {
             if (current_option.expects_argument > 0) {
-                if (input_for_option == NULL || *input_for_option == NULL) {
+                if (*input_for_option == NULL || input_for_option[0] == NULL) {
                     fprintf(stderr, "Error: %s requires a value.\n", current_option.long_opt);
                     return ERR_NO_INPUT;
                 }
