@@ -29,7 +29,7 @@ int handle_cli_argument_smart(char *input_option, char *value[], const OptionCon
         }
     }
     
-    printf("Error: No valid option provided was given '%s'. Use -h or --help for options.\n", input_option);
+    fprintf(stderr, "Error: No valid option provided was given '%s'. Use -h or --help for options.\n", input_option);
     return ERR_INVALID_INPUT;
 }
 

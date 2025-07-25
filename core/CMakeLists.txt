@@ -17,6 +17,8 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
   target_compile_options(core PRIVATE
     /W4
     # /WX
+    /RTC1
+    /RTCs
     /permissive-             # Enforce standard conformance
     /Zc:__cplusplus          # Proper __cplusplus macro
     /Zc:inline               # Standard inline semantics

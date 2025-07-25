@@ -15,7 +15,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
   message(STATUS "Using Clang-cl with MSVC ABI for C")
 
   target_compile_options(wsc PRIVATE
-    /Wall
+    /W4
     # /WX
     /RTC1
     /RTCs

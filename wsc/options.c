@@ -38,13 +38,13 @@ static void init_portDescription() {
 }
 
 const OptionContext option_contexts[] = {
-    {"-h", "--help", NULL, "Show this help message", 0, help_handler},
-    {"-ip", "--ip-address", "<address>", ipDescription, 0, NULL},
-    {"-p", "--port", "<port>", portDescription, 1, NULL},
-    {"-V", "--verbose", NULL, "Enable verbose output", 0, NULL},
-    {"-c", "--config", "<file>", "Specify configuration file", 1, NULL},
-    {"-v", "--version", NULL, "Some Version", 0, version_handler},
-    {"-V", "--verbose", NULL, "Enable verbose output", 0, NULL}
+    {"-h",  "--help",       NULL,        "Show this help message",     0, help_handler},
+    {"-ip", "--ip-address", "<address>", ipDescription,                0, NULL},
+    {"-p",  "--port",       "<port>",    portDescription,              1, NULL},
+    {"-V",  "--verbose",    NULL,        "Enable verbose output",      0, NULL},
+    {"-c",  "--config",     "<file>",    "Specify configuration file", 1, NULL},
+    {"-v",  "--version",    NULL,        "Some Version",               0, version_handler},
+    {"-V",  "--verbose",    NULL,        "Enable verbose output",      0, NULL}
 };
 
 const OptionContext *getOptions(void) {
@@ -82,8 +82,6 @@ char *format_options(OptionContext option) {
                          ? DESCRIPTION_COLUMN - option_text_len
                          : 1;  // At least one space
 
-    size_t total_len = option_text_len + padding_len + strlen(description_op) + 1;
-
     int required_len = snprintf(NULL, 0, "%s%s%*s%s%s%s%*s%s",
         tab,
         short_op,
@@ -111,8 +109,8 @@ char *format_options(OptionContext option) {
     return line;
 }
 
-int help_handler(const char *arg) {
-    for (int i = 0; i < getOptionsCount(); i++) {
+int help_handler(const char *_) {
+    for (size_t i = 0; i < getOptionsCount(); i++) {
         if (getOptions()[i].usage == NULL) {
             continue;  // Skip options without usage
         }
@@ -126,7 +124,7 @@ int help_handler(const char *arg) {
 }
 
 
-int version_handler(const char *arg) {
+int version_handler(const char *_) {
     printf("WebShare-Connect Version: %s\n", PROJECT_VERSION);
     return 0;
 }
