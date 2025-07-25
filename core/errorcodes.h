@@ -1,4 +1,3 @@
-// errorcodes.h
 #ifndef ERRORCODES_H
 #define ERRORCODES_H
 
@@ -20,4 +19,4 @@ typedef enum {
 
 } ErrorCode;
 
-#endif // ERRORCODES_H
+#endif
