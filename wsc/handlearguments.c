@@ -6,12 +6,12 @@
 #include "variables.h"
 #include "handlearguments.h"
 #include "errorcodes.h"
-#include "argumentvalueamount.h"
 #include "version.h"
 #include "options.h"
 
-int handle_cli_argument_smart(char *input_option, char *rest_of_input[], const OptionContext options[]) {
+int handle_cli_singular_argument(char *input_option, char *rest_of_input[]) {
     int handler_result;
+    const OptionContext *options = getOptions();
     size_t count = getOptionsCount();
     // Rest of input is a pointer to the next argument after the option
     for (size_t i = 0; i < count; i++) {
@@ -20,7 +20,7 @@ int handle_cli_argument_smart(char *input_option, char *rest_of_input[], const O
             // Skip options without a handler
             continue;
         }
-        const char *input_for_option[current_option.expects_argument + 1]; // +1 for NULL terminator
+        const char *input_for_option[current_option.expects_argument + 1];
         for (size_t j = 0; j < current_option.expects_argument; j++) {
             // Get the next argument if it exists
             if (i + j + 1 < count) {
@@ -30,12 +30,13 @@ int handle_cli_argument_smart(char *input_option, char *rest_of_input[], const O
             }
         }
 
-        if (strcmp(input_option, current_option.short_opt) == 0 || strcmp(input_option, current_option.long_opt) == 0) {
-            if (current_option.expects_argument > 0) {
-                if (*input_for_option == NULL || input_for_option[0] == NULL) {
-                    fprintf(stderr, "Error: %s requires a value.\n", current_option.long_opt);
-                    return ERR_NO_INPUT;
-                }
+        if (strcmp(input_option, current_option.short_opt) == 0 || 
+            strcmp(input_option, current_option.long_opt) == 0) {
+            if (current_option.expects_argument > 0 && 
+               (*input_for_option == NULL || input_for_option[0] == NULL)) {
+
+                fprintf(stderr, "Error: %s requires a value.\n", current_option.long_opt);
+                return ERR_NO_INPUT;
             }
             handler_result = current_option.handler(input_for_option);
             if (handler_result < 0) {
@@ -44,13 +45,11 @@ int handle_cli_argument_smart(char *input_option, char *rest_of_input[], const O
             return current_option.expects_argument;
         }
     }
-    
     fprintf(stderr, "Error: No valid option provided was given '%s'. Use -h or --help for options.\n", input_option);
     return ERR_INVALID_INPUT;
 }
 
 int handle_cli_arguments(int count, char *arguments[]) {
-    const OptionContext *options;
     char **rest_of_input;
     if (count < 1) {
         // can be changed later if we want different behavior
@@ -58,7 +57,6 @@ int handle_cli_arguments(int count, char *arguments[]) {
         return ERR_NO_INPUT;
     }
 
-    options = getOptions();
     for (int i = 0; i < count; i++) {
         char *argument;
         int result;
@@ -69,7 +67,7 @@ int handle_cli_arguments(int count, char *arguments[]) {
         }
         rest_of_input = &arguments[i + 1]; // Pointer to the rest of the input after the current argument
 
-        result = handle_cli_argument_smart(argument, rest_of_input, options);
+        result = handle_cli_argument_smart(argument, rest_of_input);
 
         if (result < 0) {
             return result;

@@ -37,6 +37,9 @@ static void init_portDescription() {
              "Set the port number (default: %d)", DEFAULT_PORT);
 }
 
+/**
+ * @brief This function formats the description of an option into a string.
+ */
 const OptionContext option_contexts[] = {
     {"-h",  "--help",       NULL,        "Show this help message",     0, help_handler},
     {"-ip", "--ip-address", "<address>", ipDescription,                0, NULL},
@@ -60,10 +63,6 @@ size_t getOptionsCount(void) {
 
 #define BETWEEN_COLUMN 7  // Space between short and long option
 #define DESCRIPTION_COLUMN 36  // Column where description should start
-/**
- * Format the options into a single string.
- * This function concatenates the options array into a single string
- */
 char *format_options(OptionContext option) {
     const char *short_op = option.short_opt;
     const char *long_op = option.long_opt;
@@ -112,17 +111,19 @@ char *format_options(OptionContext option) {
 int help_handler(const char *_[]) {
     for (size_t i = 0; i < getOptionsCount(); i++) {
         if (getOptions()[i].handler == NULL) {
-            continue;  // Skip options without usage
+            continue;  // Skip options without handler
         }
         char *formatted = format_options(getOptions()[i]);
         if (formatted) {
             printf("%s\n", formatted);
-            free(formatted); // free immediately after use
+            free(formatted);
+        } else {
+            fprintf(stderr, "Error: Memory allocation failed while formatting options.\n");
+            return ERR_MEMORY_ALLOCATION;
         }
     }
     return 0;
 }
-
 
 int version_handler(const char *_[]) {
     printf("WebShare-Connect Version: %s\n", PROJECT_VERSION);
@@ -150,5 +151,5 @@ int port_handler(const char *args[]) {
     PORT = (uint16_t)port; // Assuming DEFAULT_PORT is a global variable
     
     printf("Port set to %d\n", port);
-    return 1; //Number of arguments consumed
+    return 0; //Number of arguments consumed
 }

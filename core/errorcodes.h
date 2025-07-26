@@ -6,6 +6,7 @@ typedef enum {
     ERR_NO_INPUT           = -0x000001,
     ERR_INVALID_INPUT      = -0x000002,
     ERR_NO_HANDLER         = -0x000003,
+    ERR_MEMORY_ALLOCATION  = -0x000004,
 
     // Port-related errors
     ERR_INVALID_PORT       = -0x000011,

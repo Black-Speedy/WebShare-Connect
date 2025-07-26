@@ -1,3 +1,0 @@
-#ifndef PORT_VALUE_AMOUNT
-#define PORT_VALUE_AMOUNT 1
-#endif
