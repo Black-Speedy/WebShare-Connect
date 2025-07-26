@@ -1,3 +1,7 @@
+#ifndef _WIN32 // Seems like this was necessary otherwise linux would not compile
+#define _POSIX_C_SOURCE 200112L
+#endif
+#include <signal.h>
 #include <stdio.h>
 #include <zmq.h>
 #include <string.h>

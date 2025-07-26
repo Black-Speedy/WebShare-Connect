@@ -1,11 +1,12 @@
+#ifndef _WIN32
+  #define _POSIX_C_SOURCE 200112L
+  #include <errno.h>  /* errno */
+  #include <string.h> /* strerror(), strlen() */
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
 
-#ifndef _WIN32
-  #include <errno.h>  /* errno */
-  #include <string.h> /* strerror(), strlen() */
-#endif
 
 #include "cthreads.h"
 

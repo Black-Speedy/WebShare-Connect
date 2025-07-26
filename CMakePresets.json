@@ -44,7 +44,7 @@
         },
         {
             "name": "windows-base",
-            "inherits": "matwin",
+            "inherits": "mikwin",
             "hidden": true,
             "generator": "Ninja",
             "condition": {

@@ -5,6 +5,7 @@ libnice
 libsodium
 qt6-base
 qt6-declarative
+qt6-svg
 
 # AUR packages
 aur:czmq
