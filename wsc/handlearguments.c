@@ -67,7 +67,7 @@ int handle_cli_arguments(int count, char *arguments[]) {
         }
         rest_of_input = &arguments[i + 1]; // Pointer to the rest of the input after the current argument
 
-        result = handle_cli_argument_smart(argument, rest_of_input);
+        result = handle_cli_singular_argument(argument, rest_of_input);
 
         if (result < 0) {
             return result;
