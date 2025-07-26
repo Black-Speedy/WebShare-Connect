@@ -147,3 +147,7 @@ CMakeLists.txt.user*
 CMakeFiles/
 
 *.cfg
+
+.clangd
+
+CMakeUserPresets.json

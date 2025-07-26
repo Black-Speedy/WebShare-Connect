@@ -1,56 +1,19 @@
 {
-    "version": 3,
+    "version": 4,
+    "include": [ "CMakeUserPresets.json" ],
     "configurePresets": [
-        {   "name": "matwin",
-            "hidden": true,
-            "environment": {
-                "VCPKG_ROOT": "F:/packagemanagers/vcpkg",
-                "CMAKE_TOOLCHAIN_FILE": "F:/packagemanagers/vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "CMAKE_MAKE_PROGRAM": "F:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-                "CMAKE_C_COMPILER": "clang-cl.exe",
-                "CMAKE_CXX_COMPILER": "clang-cl.exe"
-            },
-            "cacheVariables": {
-                "VCPKG_ROOT": "F:/packagemanagers/vcpkg",
-                "CMAKE_TOOLCHAIN_FILE": "F:/packagemanagers/vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "CMAKE_MAKE_PROGRAM": "F:/Program Files/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-                "CMAKE_C_COMPILER": "clang-cl.exe",
-                "CMAKE_CXX_COMPILER": "clang-cl.exe"
-            }
-        },
-        {   "name": "mikwin",
-            "hidden": true,
-            "environment": {
-                "VCPKG_ROOT": "F:/Tools/vcpkg",
-                "CMAKE_TOOLCHAIN_FILE": "F:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "CMAKE_MAKE_PROGRAM": "F:/Programs/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-                "CMAKE_C_COMPILER": "clang-cl.exe",
-                "CMAKE_CXX_COMPILER": "clang-cl.exe"
-            },
-            "cacheVariables": {
-                "VCPKG_ROOT": "F:/Tools/vcpkg",
-                "CMAKE_TOOLCHAIN_FILE": "F:/Tools/vcpkg/scripts/buildsystems/vcpkg.cmake",
-                "CMAKE_MAKE_PROGRAM": "F:/Programs/Microsoft Visual Studio/2022/Community/Common7/IDE/CommonExtensions/Microsoft/CMake/Ninja/ninja.exe",
-                "CMAKE_C_COMPILER": "clang-cl.exe",
-                "CMAKE_CXX_COMPILER": "clang-cl.exe"
-            }
-        },
-        {   "name": "matlin",
-            "hidden": true,
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang",
-                "CMAKE_CXX_COMPILER": "clang++"
-            }
-        },
         {
             "name": "windows-base",
-            "inherits": "mikwin",
+            "inherits": "user-win",
             "hidden": true,
             "generator": "Ninja",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
+            },
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
         },
         {
@@ -114,13 +77,16 @@
         },
         {
             "name": "linux-base",
-            "inherits": "matlin",
+            "inherits": "user-lin",
             "hidden": true,
             "generator": "Ninja",
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Linux"
+            },
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
         },
         {
