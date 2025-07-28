@@ -1,4 +1,4 @@
-﻿cmake_minimum_required(VERSION 3.16)
+﻿cmake_minimum_required(VERSION 4.0.2)
 
 set(PROJECT_VERSION_MAJOR 0)
 set(PROJECT_VERSION_MINOR 0)
@@ -13,6 +13,15 @@ project(WebShare-Connect
 
 add_executable(WebShare-Connect main.c
     CMakePresets.json)
+
+if (VCPKG_ROOT)
+    message(STATUS "Using vcpkg at ${VCPKG_ROOT}")
+    set(CMAKE_TOOLCHAIN_FILE "${VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake")
+    file(WRITE ${CMAKE_SOURCE_DIR}/.clangd
+    "CompileFlags:
+    Add: [-I${VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/include]
+    ")
+endif()
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -138,3 +147,4 @@ if(BUILD_TESTS)
 endif()
 
 target_link_libraries(WebShare-Connect PRIVATE core)
+

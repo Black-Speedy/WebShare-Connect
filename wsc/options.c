@@ -135,14 +135,17 @@ int port_handler(const char *args[]) {
     printf("We are in port_handler\n");
     printf("Argument received: %s\n", args[0]);
     const char *arg = args[0];
-    if (arg == NULL) {
+    if (arg == NULL || arg[0] == '\0') {
         fprintf(stderr, "Error: Port requires a value.\n");
         return ERR_PORT_MISSING_VALUE;
     }
     printf("Setting port to: %s\n", arg);
     
     int port = atoi(arg);
-    if (port <= 0 || port > 65535) {
+    if (port == 0) {
+        fprintf(stderr, "Error: Port cannot be zero. Or you have inserted a non-integer value.\n");
+        return ERR_INVALID_PORT;
+    } else if (port < 1 || port > 65535) {
         fprintf(stderr, "Error: Invalid port number '%s'. Must be between 1 and 65535.\n", arg);
         return ERR_INVALID_PORT;
     }
