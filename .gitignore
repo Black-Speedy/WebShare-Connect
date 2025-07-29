@@ -153,3 +153,5 @@ CMakeFiles/
 CMakeUserPresets.json
 
 *Testing/
+
+*.profraw
