@@ -20,6 +20,7 @@
 // };
 int help_handler(const char *arg[]);
 int version_handler(const char *arg[]);
+int address_handler(const char *args[]);
 
 static char ipDescription[100];
 // is a constructor
@@ -42,7 +43,7 @@ static void init_portDescription() {
  */
 const OptionContext option_contexts[] = {
     {"-h",  "--help",       NULL,        "Show this help message",     0, help_handler},
-    {"-ip", "--ip-address", "<address>", ipDescription,                0, NULL},
+    {"-a",  "--address",    "<address>", ipDescription,                1, address_handler},
     {"-p",  "--port",       "<port>",    portDescription,              1, port_handler},
     {"-V",  "--verbose",    NULL,        "Enable verbose output",      0, NULL},
     {"-c",  "--config",     "<file>",    "Specify configuration file", 1, NULL},
@@ -81,7 +82,7 @@ char *format_options(OptionContext option) {
                          ? DESCRIPTION_COLUMN - option_text_len
                          : 1;  // At least one space
 
-    int required_len = snprintf(NULL, 0, "%s%s%*s%s%s%s%*s%s",
+    int required_len = snprintf(NULL, 0, "%s%s%*s%s%s %s%*s%s",
         tab,
         short_op,
         (int)between_padding, "",
@@ -94,7 +95,7 @@ char *format_options(OptionContext option) {
     char *line = malloc(required_len + 1);  // +1 for null terminator
     if (!line) return NULL;
 
-    sprintf(line, "%s%s%*s%s%s%s%*s%s",
+    sprintf(line, "%s%s%*s%s%s %s%*s%s",
         tab,
         short_op,
         (int)between_padding, "",
@@ -131,9 +132,6 @@ int version_handler(const char *_[]) {
 }
 
 int port_handler(const char *args[]) {
-    printf("We are in port_handler\n");
-    printf("We are in port_handler\n");
-    printf("Argument received: %s\n", args[0]);
     const char *arg = args[0];
     if (arg == NULL || arg[0] == '\0') {
         fprintf(stderr, "Error: Port requires a value.\n");
@@ -154,5 +152,43 @@ int port_handler(const char *args[]) {
     PORT = (uint16_t)port; // Assuming DEFAULT_PORT is a global variable
     
     printf("Port set to %d\n", port);
+    return 0; //Number of arguments consumed
+}
+
+
+int address_handler(const char *args[]) {
+    const char *ip_address = args[0];
+    if (ip_address == NULL || ip_address[0] == '\0') {
+        fprintf(stderr, "Error: IP address requires a value.\n");
+        return ERR_IP_MISSING_VALUE;
+    }
+
+    if (strcmp(ip_address, IP_ADDRESS) == 0) {
+        printf("IP address is already set to %s\n", IP_ADDRESS);
+        return 0; // No change needed
+    }
+
+    if(strlen(ip_address) > sizeof(IP_ADDRESS)) {
+        // reallocate memory for IP_ADDRESS
+        char *temp = (char *)realloc(IP_ADDRESS, strlen(ip_address) + 1);
+        if (temp == NULL) {
+            fprintf(stderr, "Error: Memory allocation failed for IP address.\n");
+            return ERR_MEMORY_ALLOCATION;
+        }
+        IP_ADDRESS = temp;
+    }
+
+    #ifdef _WIN32
+        strncpy_s(IP_ADDRESS, strlen(ip_address) + 1, ip_address, _TRUNCATE);
+    #else
+        strncpy(IP_ADDRESS, ip_address, strlen(ip_address) + 1);
+    #endif
+    IP_ADDRESS[strlen(ip_address)] = '\0'; // Ensure null termination
+    if (IP_ADDRESS == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed for IP address.\n");
+        return ERR_MEMORY_ALLOCATION;
+    }
+
+    printf("IP address set to %s\n", IP_ADDRESS);
     return 0; //Number of arguments consumed
 }

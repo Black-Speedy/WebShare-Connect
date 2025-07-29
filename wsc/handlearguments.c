@@ -56,6 +56,7 @@ int handle_cli_arguments(int count, char *arguments[]) {
         fprintf(stderr, "Error: No option provided. Use -h or --help for options.\n");
         return ERR_NO_INPUT;
     }
+    init_ip_address();
 
     for (int i = 0; i < count; i++) {
         char *argument;
