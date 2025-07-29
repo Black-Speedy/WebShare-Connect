@@ -28,7 +28,7 @@ static void worker_loop(void *arg) {
     }
 }
 
-int worker_pool_init(worker_pool_t *pool, job_queue_t *queue, size_t num_threads) {
+int worker_pool_init(worker_pool_t *pool, job_queue_t *queue, uint16_t num_threads) {
     pool->num_threads = num_threads;
     pool->job_queue   = queue;
     pool->running     = 1;

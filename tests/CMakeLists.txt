@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 4.0.2)
 
 include(CTest)      
 include_directories(${CMAKE_SOURCE_DIR}/core)
-include_directories(${CMAKE_BINARY_DIR}/core)                      # enables `ctest` command
+include_directories(${CMAKE_BINARY_DIR}/core)
 find_package(Threads REQUIRED)
 
 #-----------------------------------------------------------------------------#
