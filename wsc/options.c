@@ -43,12 +43,11 @@ static void init_portDescription() {
  */
 const OptionContext option_contexts[] = {
     {"-h",  "--help",       NULL,        "Show this help message",     0, help_handler},
+    {"-v",  "--version",    NULL,        "Some Version",               0, version_handler},
+    {"-V",  "--verbose",    NULL,        "Enable verbose output",      0, NULL},
     {"-a",  "--address",    "<address>", ipDescription,                1, address_handler},
     {"-p",  "--port",       "<port>",    portDescription,              1, port_handler},
-    {"-V",  "--verbose",    NULL,        "Enable verbose output",      0, NULL},
-    {"-c",  "--config",     "<file>",    "Specify configuration file", 1, NULL},
-    {"-v",  "--version",    NULL,        "Some Version",               0, version_handler},
-    {"-V",  "--verbose",    NULL,        "Enable verbose output",      0, NULL}
+    {"-c",  "--config",     "<file>",    "Specify configuration file", 1, NULL}
 };
 
 const OptionContext *getOptions(void) {
@@ -63,18 +62,21 @@ size_t getOptionsCount(void) {
 }
 
 #define BETWEEN_COLUMN 7  // Space between short and long option
-#define DESCRIPTION_COLUMN 36  // Column where description should start
+#define DESCRIPTION_COLUMN 30  // Column where description should start
 char *format_options(OptionContext option) {
     const char *short_op = option.short_opt;
     const char *long_op = option.long_opt;
     const char *description_op = option.description;
     const char *usage_op = option.usage ? option.usage : "";
 
-    const char *tab = "   ";
     const char *between = "| ";
 
-    size_t option_text_len = strlen(tab) + strlen(short_op) + strlen(between) + strlen(long_op) + strlen(" ") + strlen(usage_op);
-    size_t length_upto_between = strlen(tab) + strlen(short_op);
+    size_t option_text_len = strlen(short_op) + 
+                             strlen(between) + 
+                             strlen(long_op) + 
+                             strlen(" ") + 
+                             strlen(usage_op);
+    size_t length_upto_between = strlen(short_op);
     size_t between_padding = (BETWEEN_COLUMN > length_upto_between)
                              ? BETWEEN_COLUMN - length_upto_between
                              : 1;  // At least one space
@@ -82,8 +84,7 @@ char *format_options(OptionContext option) {
                          ? DESCRIPTION_COLUMN - option_text_len
                          : 1;  // At least one space
 
-    int required_len = snprintf(NULL, 0, "%s%s%*s%s%s %s%*s%s",
-        tab,
+    int required_len = snprintf(NULL, 0, "   %s%*s%s%s %s%*s%s",
         short_op,
         (int)between_padding, "",
         between,
@@ -95,8 +96,7 @@ char *format_options(OptionContext option) {
     char *line = malloc(required_len + 1);  // +1 for null terminator
     if (!line) return NULL;
 
-    sprintf(line, "%s%s%*s%s%s %s%*s%s",
-        tab,
+    sprintf(line, "   %s%*s%s%s %s%*s%s",
         short_op,
         (int)between_padding, "",
         between,
@@ -111,8 +111,14 @@ char *format_options(OptionContext option) {
 
 int help_handler(const char *_[]) {
     for (size_t i = 0; i < getOptionsCount(); i++) {
+        if (i == 0) {
+            printf("Usage: wsc [options]\n");
+            printf("Program Control Options:\n");
+        } else if (strcmp(getOptions()[i].short_opt, "-a") == 0) {
+            printf("\nExecution Configuration Options:\n");
+        }
         if (getOptions()[i].handler == NULL) {
-            continue;  // Skip options without handler
+            goto Example;  // Skip options without handler
         }
         char *formatted = format_options(getOptions()[i]);
         if (formatted) {
@@ -121,6 +127,11 @@ int help_handler(const char *_[]) {
         } else {
             fprintf(stderr, "Error: Memory allocation failed while formatting options.\n");
             return ERR_MEMORY_ALLOCATION;
+        }
+        // Print example usage for the -c option
+        Example:
+        if (strcmp(getOptions()[i].short_opt, "-c") == 0) {
+            printf("Example: wsc --port 8080 --ip-adress 1.1.1.1\n");
         }
     }
     return 0;
