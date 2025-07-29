@@ -8,6 +8,8 @@ add_library(core
     cthreads.h
     jobqueue.c
     jobqueue.h
+    workerpool.c
+    workerpool.h
 )
 
 # Detect Clang with MSVC-like frontend
