@@ -3,6 +3,8 @@ cmake_minimum_required(VERSION 4.0.2)
 include(CTest)      
 include_directories(${CMAKE_SOURCE_DIR}/core)
 include_directories(${CMAKE_BINARY_DIR}/core)
+include_directories(${CMAKE_SOURCE_DIR}/wsc)
+include_directories(${CMAKE_SOURCE_DIR}/gui)
 find_package(Threads REQUIRED)
 
 #-----------------------------------------------------------------------------#
@@ -40,9 +42,7 @@ set(COVERAGE_OBJECTS)       # holds $<TARGET_FILE:...> for llvm-cov
 
 foreach(test IN LISTS TESTS)
   add_executable(${test} ${${test}_SOURCES})
-  if(test STREQUAL "test_job_queue" OR test STREQUAL "test_job_queue_comprehensive")
-    target_link_libraries(${test} PRIVATE core Threads::Threads)
-  endif()
+  target_link_libraries(${test} PRIVATE core Threads::Threads)
   list(APPEND COVERAGE_OBJECTS --object=$<TARGET_FILE:${test}>)
   add_test(NAME ${test} COMMAND ${test})
 endforeach()
