@@ -3,13 +3,11 @@ project(core LANGUAGES C)
 
 add_library(core
     core.c
-    core.h
     cthreads.c
-    cthreads.h
     jobqueue.c
-    jobqueue.h
     workerpool.c
-    workerpool.h
+    variables.c
+    allocatecopystring.c
 )
 
 # Detect Clang with MSVC-like frontend
@@ -63,7 +61,7 @@ endif()
 
 
 set_target_properties(core PROPERTIES
-  C_STANDARD 11
+  C_STANDARD 17
   C_STANDARD_REQUIRED ON
 )
 

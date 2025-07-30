@@ -1,12 +1,9 @@
 cmake_minimum_required(VERSION 4.0.2)
 
 # project(wsc LANGUAGES C)
-
-
 add_executable(wsc main.c
                handlearguments.c
                options.c
-               ../core/variables.c
 
 )
 
@@ -61,7 +58,7 @@ endif()
 
 
 set_target_properties(wsc PROPERTIES
-  C_STANDARD 11
+  C_STANDARD 17
   C_STANDARD_REQUIRED ON
 )
 

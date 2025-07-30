@@ -35,7 +35,7 @@ int handle_cli_singular_argument(char *input_option, char *rest_of_input[]) {
             strcmp(input_option, current_option.long_opt) == 0) {
             if (current_option.expects_argument > 0 &&
                 (*input_for_option == NULL || input_for_option[0] == NULL)) {
-                fprintf(stderr, "Error: %s requires a value.\n", current_option.long_opt);
+                fprintf(stderr, "Error: %s/%s requires a value.\n", current_option.short_opt, current_option.long_opt);
                 return ERR_NO_INPUT;
             }
 

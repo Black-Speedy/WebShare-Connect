@@ -6,10 +6,12 @@
 #include <stdint.h>
 #include "variables.h"
 #include "errorcodes.h"
+#include "allocatecopystring.h"
 
 int help_handler(const char *arg[]);
 int version_handler(const char *arg[]);
 int address_handler(const char *args[]);
+int filepath_handler(const char *args[]);
 
 static char ipDescription[100];
 // is a constructor
@@ -27,16 +29,74 @@ static void init_portDescription() {
              "Set the port number (default: %d)", DEFAULT_PORT);
 }
 
+const OptionContext help = {
+    .short_opt        = "-h",
+    .long_opt         = "--help",
+    .usage            = NULL,
+    .description      = "Show this help message",
+    .expects_argument =                        0,
+    .handler          = help_handler
+};
+const OptionContext version = {
+    .short_opt        = "-v",
+    .long_opt         = "--version",
+    .usage            = NULL,
+    .description      = "Display the version of the application",
+    .expects_argument =                                        0,
+    .handler          = version_handler
+};
+const OptionContext port = {
+    .short_opt        = "-p",
+    .long_opt         = "--port",
+    .usage            = "<port>",
+    .description      = portDescription,
+    .expects_argument =               1,
+    .handler          = port_handler
+};
+const OptionContext address = {
+    .short_opt        = "-a",
+    .long_opt         = "--address",
+    .usage            = "<address>",
+    .description      = ipDescription,
+    .expects_argument =             1,
+    .handler          = address_handler
+};
+const OptionContext filepath = {
+    .short_opt        = "-f",
+    .long_opt         = "--file",
+    .usage            = "<file>",
+    .description      = "Specify input file path",
+    .expects_argument =                         1,
+    .handler          = filepath_handler
+};
+const OptionContext config = {
+    .short_opt        = "-c",
+    .long_opt         = "--config",
+    .usage            = "<file>",
+    .description      = "Specify configuration file",
+    .expects_argument =                            1,
+    .handler          = NULL
+};
+const OptionContext verbose = {
+    .short_opt        = "-V",
+    .long_opt         = "--verbose",
+    .usage            = NULL,
+    .description      = "Enable verbose output",
+    .expects_argument =                       0,
+    .handler          = NULL
+};
+
 /**
  * @brief This function formats the description of an option into a string.
  */
 const OptionContext option_contexts[] = {
-    {"-h", "--help",    NULL,        "Show this help message",     0, help_handler   },
-    {"-v", "--version", NULL,        "Some Version",               0, version_handler},
-    {"-V", "--verbose", NULL,        "Enable verbose output",      0, NULL           },
-    {"-a", "--address", "<address>", ipDescription,                1, address_handler},
-    {"-p", "--port",    "<port>",    portDescription,              1, port_handler   },
-    {"-c", "--config",  "<file>",    "Specify configuration file", 1, NULL           }
+    help,
+    version,
+    verbose,
+    address,
+    port,
+    filepath,
+    config
 };
 
 const OptionContext *getOptions(void) {
@@ -127,7 +187,8 @@ Example:
 }
 
 int version_handler(const char *_[]) {
-    printf("WebShare-Connect Version: %s\n", PROJECT_VERSION);
+    printf("WebShare-Connect Component Versions:\n  Overall Version: %s\n  CLI Version: %s\n  Core Version: %s\n",
+           PROJECT_VERSION, CLI_PROJECT_VERSION, CORE_PROJECT_VERSION);
     return 0;
 }
 
@@ -137,8 +198,6 @@ int port_handler(const char *args[]) {
         fprintf(stderr, "Error: Port requires a value.\n");
         return ERR_PORT_MISSING_VALUE;
     }
-
-    printf("Setting port to: %s\n", arg);
 
     int port = atoi(arg);
     if (port == 0) {
@@ -153,10 +212,11 @@ int port_handler(const char *args[]) {
     PORT = (uint16_t)port; // Assuming DEFAULT_PORT is a global variable
 
     printf("Port set to %d\n", port);
-    return 0; //Number of arguments consumed
+    return 0;
 }
 
 int address_handler(const char *args[]) {
+    int        error;
     const char *ip_address = args[0];
     if (ip_address == NULL || ip_address[0] == '\0') {
         fprintf(stderr, "Error: IP address requires a value.\n");
@@ -179,11 +239,20 @@ int address_handler(const char *args[]) {
         IP_ADDRESS = temp;
     }
 
-    #ifdef _WIN32
-        strncpy_s(IP_ADDRESS, strlen(ip_address) + 1, ip_address, _TRUNCATE);
-    #else
-        strncpy(IP_ADDRESS, ip_address, strlen(ip_address) + 1);
-    #endif
+    IP_ADDRESS = malloc(strlen(ip_address) + 1); // Allocate memory for IP address
+    if (IP_ADDRESS == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed for IP address.\n");
+        return ERR_MEMORY_ALLOCATION;
+    }
+
+    error = snprintf(IP_ADDRESS, strlen(ip_address) + 1, "%s", ip_address);
+    if (error < 0) {
+        free(IP_ADDRESS);  // Free allocated memory on error
+        IP_ADDRESS = NULL; // Set to NULL to avoid dangling pointer
+        fprintf(stderr, "Error: Failed to copy IP address.\n");
+        return error;
+    }
+
     IP_ADDRESS[strlen(ip_address)] = '\0'; // Ensure null termination
     if (IP_ADDRESS == NULL) {
         fprintf(stderr, "Error: Memory allocation failed for IP address.\n");
@@ -191,5 +260,43 @@ int address_handler(const char *args[]) {
     }
 
     printf("IP address set to %s\n", IP_ADDRESS);
-    return 0; //Number of arguments consumed
+    return 0;
+}
+
+int filepath_handler(const char *args[]) {
+    int        error;
+    size_t     file_path_length;
+    const char *file_path = args[0];
+    if (file_path == NULL || file_path[0] == '\0') {
+        fprintf(stderr, "Error: File path requires a value.\n");
+        return ERR_FILE_MISSING_VALUE;
+    }
+
+    // Here you would typically set the file path in your application context
+    // For demonstration, we just print it
+    printf("File path set to: %s\n", file_path);
+
+    // error = allocate_and_copy_string(&FILE_PATH, file_path);
+    // if (error < 0) {
+    //     fprintf(stderr, "Error: Failed to allocate and copy file path.\n");
+    //     return error;
+    // }
+
+    file_path_length = strlen(file_path);
+
+    FILE_PATH = malloc(file_path_length + 1); // Allocate memory for file path
+    if (FILE_PATH == NULL) {
+        fprintf(stderr, "Error: Memory allocation failed for file path.\n");
+        return ERR_MEMORY_ALLOCATION;
+    }
+
+    error = snprintf(FILE_PATH, file_path_length + 1, "%s", file_path); // Copy the file path into FILE_PATH
+    if (error < 0) {
+        free(FILE_PATH);                                                // Free allocated memory on error
+        fprintf(stderr, "Error: Failed to copy file path.\n");
+        return error;
+    }
+
+    FILE_PATH[strlen(file_path)] = '\0'; // Ensure null termination
+    return 0;
 }
