@@ -1,0 +1,33 @@
+{
+  "version": 4,
+  "configurePresets": [
+    {
+      "name": "user-win",
+      "hidden": true,
+      "toolchainFile": "path/to/toolchain/file if needed",
+      "environment": {
+        "VCPKG_ROOT": "path/to/vcpkg if needed"
+      },
+      "cacheVariables": {
+        "VCPKG_ROOT": "path/to/vcpkg if needed",
+        "CMAKE_MAKE_PROGRAM": "path/to/ninja.exe if needed",
+        "CMAKE_C_COMPILER": "path/to/c-compiler.exe if needed",
+        "CMAKE_CXX_COMPILER": "path/to/cxx-compiler.exe if needed"
+      }
+    },
+    {
+      "name": "user-lin",
+      "hidden": true,
+      "toolchainFile": "path/to/toolchain/file if needed (usually not needed for Linux unless using vcpkg or similar)",
+      "environment": {
+        "VCPKG_ROOT": "path/to/vcpkg if needed (not needed unless using vcpkg)"
+      },
+      "cacheVariables": {
+        "VCPKG_ROOT": "path/to/vcpkg if needed (not needed unless using vcpkg)",
+        "CMAKE_MAKE_PROGRAM": "path/to/ninja if needed (not needed if using make and usually not needed for Linux if installed via package manager)",
+        "CMAKE_C_COMPILER": "path/to/c-compiler if needed (usually not needed for Linux if using gcc)",
+        "CMAKE_CXX_COMPILER": "path/to/cxx-compiler if needed (usually not needed for Linux if using g++)"
+      }
+    }
+  ]
+}
