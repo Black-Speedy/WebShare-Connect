@@ -1,20 +1,20 @@
-#include "allocatecopystring.h"
-#include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
-int allocate_and_copy_string(char **dest, const char *src) {
-    if (src == NULL) {
-        *dest = NULL;
-        return 0; // No string to copy
-    }
+#include "variables.h"
+#include "allocatecopystring.h"
 
-    size_t len   = strlen(src);
-    char   *temp = malloc(len + 1); // +1 for null terminator
-    if (temp == NULL) {
-        return -1;                  // Memory allocation failed
-    }
+const uint16_t DEFAULT_PORT = 54832;
+const uint8_t  IPV4[4]      = {127, 0, 0, 1};
+uint16_t       PORT         = DEFAULT_PORT;
+const char     *DEFAULT_IP  = "127.0.0.1";
+char           *FILE_PATH   = NULL; // File path for the application, can be set later
 
-    snprintf(temp, len + 1, "%s", src);
-    *dest = temp;
-    return 0; // Success
+// allocate memory for IP_ADDRESS that can be modified at runtime
+char *IP_ADDRESS = NULL;
+
+void init_ip_address() {
+    int error = allocate_and_copy_string(&IP_ADDRESS, DEFAULT_IP);
+    if (error != 0) {
+        fprintf(stderr, "Error: Failed to allocate and copy IP address.\n");
+        return;
+    }
 }

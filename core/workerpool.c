@@ -1,8 +1,7 @@
-# include <stdlib.h>
-# include <stdio.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <assert.h>
-
-# include "workerpool.h"
+#include "workerpool.h"
 
 // placeholder for task handling function
 static void handle_encrypt(void *data) {
@@ -10,8 +9,15 @@ static void handle_encrypt(void *data) {
 }
 
 static void worker_loop(void *arg) {
-    worker_pool_t *pool = (worker_pool_t *)arg;
-    task_t        *task;
+    #ifdef _WIN32
+        struct cthreads_args *args = (struct cthreads_args *)arg;
+        worker_pool_t        *pool = (worker_pool_t *)args->data;
+        free(args);
+    #else
+        worker_pool_t *pool = (worker_pool_t *)arg;
+    #endif
+
+    task_t *task;
 
     while (job_queue_pop(pool->job_queue, (task_t **)&task) == 0) {
         switch (task->type) {
@@ -36,5 +42,37 @@ int worker_pool_init(worker_pool_t *pool, job_queue_t *queue, uint16_t num_threa
     pool->thread = calloc(num_threads, sizeof(struct cthreads_thread));
     if (!pool->thread) return -1;
 
+    for (size_t i = 0; i < num_threads; ++i) {
+        // need to test on windows and POSIX
+        #ifdef _WIN32
+            struct cthreads_args *args = malloc(sizeof(struct cthreads_args));
+            if (!args) return -1;
+
+            args->func = worker_loop;
+            args->data = pool;
+            cthreads_thread_create(&pool->thread[i], NULL, worker_loop, pool, args);
+        #else
+            // args is ignored on POSIX
+            cthreads_thread_create(&pool->thread[i], NULL, worker_loop, pool, NULL);
+        #endif
+    }
+
     return 0;
 }
+
+int worker_pool_destroy(worker_pool_t *pool) {
+    pool->running = 0;
+
+    job_queue_stop(pool->job_queue);
+
+    // signal threads to stop
+    for (size_t i = 0; i < pool->num_threads; ++i) {
+        cthreads_thread_join(pool->thread[i], NULL);
+    }
+
+    free(pool->thread);
+    return 0;
+}
+
+// TODO: add tests to ensure worker pool functionality
+// maybe a simple fibonacci task or similar?

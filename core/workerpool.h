@@ -1,10 +1,10 @@
 #ifndef CORE_WORKERPOOL_H
 #define CORE_WORKERPOOL_H
 
+#include <stdint.h>
 #include "cthreads.h"
 #include "tasks.h"
 #include "jobqueue.h"
-#include <stdint.h>
 
 typedef struct {
     int                    running;

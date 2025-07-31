@@ -1,5 +1,5 @@
-#include "variables.h"
 #include <stdio.h>
+#include "variables.h"
 #include "allocatecopystring.h"
 
 const uint16_t DEFAULT_PORT = 54832;
