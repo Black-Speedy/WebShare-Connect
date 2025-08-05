@@ -7,6 +7,7 @@ typedef enum {
     TASK_HASH,
     TASK_STITCH_CHUNKS,
     TASK_VERIFY_CHECKSUM,
+    TASK_FIB,  // Example task for testing
 } task_type_t;
 
 typedef struct {

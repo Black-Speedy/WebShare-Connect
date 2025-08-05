@@ -2,13 +2,14 @@
 #include <stdio.h>
 #include <assert.h>
 #include "workerpool.h"
+#include "task_handlers.h"
 
 // placeholder for task handling function
 static void handle_encrypt(void *data) {
     printf("Handling encryption task with data: %p\n", data);
 }
 
-static void worker_loop(void *arg) {
+static void *worker_loop(void *arg) {
     #ifdef _WIN32
         struct cthreads_args *args = (struct cthreads_args *)arg;
         worker_pool_t        *pool = (worker_pool_t *)args->data;
@@ -32,6 +33,8 @@ static void worker_loop(void *arg) {
         free(task->data);
         free(task);
     }
+
+    return NULL;
 }
 
 int worker_pool_init(worker_pool_t *pool, job_queue_t *queue, uint16_t num_threads) {

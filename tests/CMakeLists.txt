@@ -22,6 +22,7 @@ set(TESTS
   test_job_queue
   test_job_queue_comprehensive
   test_cli_options
+  test_worker_pool
 )
 
 set(test_job_queue_SOURCES
@@ -35,6 +36,8 @@ set(test_cli_options_SOURCES
     ../wsc/options.c
     ../core/variables.c)
 
+set(test_worker_pool_SOURCES
+    test_worker_pool.c)
 #-----------------------------------------------------------------------------#
 # 3. Generate every test target, attach libraries, and register with CTest
 #-----------------------------------------------------------------------------#
