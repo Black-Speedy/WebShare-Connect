@@ -37,7 +37,9 @@ set(test_cli_options_SOURCES
     ../core/variables.c)
 
 set(test_worker_pool_SOURCES
-    test_worker_pool.c)
+    test_worker_pool.c
+    ../core/workerpool.c
+    ../core/jobqueue.c)
 #-----------------------------------------------------------------------------#
 # 3. Generate every test target, attach libraries, and register with CTest
 #-----------------------------------------------------------------------------#
@@ -57,6 +59,8 @@ set_tests_properties(test_job_queue_comprehensive
   PROPERTIES TIMEOUT 60 PASS_REGULAR_EXPRESSION "ALL TESTS PASSED")
 set_tests_properties(test_cli_options
   PROPERTIES TIMEOUT 30 PASS_REGULAR_EXPRESSION "All CLI options tests passed")
+#set_tests_properties(test_worker_pool
+#  PROPERTIES TIMEOUT 15 PASS_REGULAR_EXPRESSION "test_worker_pool passed")
 
 #-----------------------------------------------------------------------------#
 # 4. Unified targets for “run all” and for HTML coverage

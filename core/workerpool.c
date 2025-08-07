@@ -9,14 +9,20 @@ static void handle_encrypt(void *data) {
     printf("Handling encryption task with data: %p\n", data);
 }
 
+static uint64_t fib(uint64_t n) {
+    return (n < 2) ? n : fib(n - 1) + fib(n - 2);
+}
+
+static void handle_fib(void *data) {
+    uint64_t n   = *(uint64_t *)data;
+    uint64_t res = fib(n);
+    printf("fib(%llu) = %llu   (thread %lu)\n",
+           (unsigned long long)n, (unsigned long long)res,
+           cthreads_thread_id(cthreads_thread_self()));
+}
+
 static void *worker_loop(void *arg) {
-    #ifdef _WIN32
-        struct cthreads_args *args = (struct cthreads_args *)arg;
-        worker_pool_t        *pool = (worker_pool_t *)args->data;
-        free(args);
-    #else
-        worker_pool_t *pool = (worker_pool_t *)arg;
-    #endif
+    worker_pool_t *pool = (worker_pool_t *)arg;
 
     task_t *task;
 
@@ -24,6 +30,9 @@ static void *worker_loop(void *arg) {
         switch (task->type) {
         case TASK_ENCRYPT:
             handle_encrypt(task->data);
+            break;
+        case TASK_FIB:
+            handle_fib(task->data);
             break;
         default:
             fprintf(stderr, "[worker] Unknown task type: %d\n", task->type);
@@ -79,3 +88,4 @@ int worker_pool_destroy(worker_pool_t *pool) {
 
 // TODO: add tests to ensure worker pool functionality
 // maybe a simple fibonacci task or similar?
+// sleep test to ensure threads are working correctly
