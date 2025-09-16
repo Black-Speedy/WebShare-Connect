@@ -1,26 +1,105 @@
-﻿{
-    "version": 3,
+{
+    "version": 4,
+    "include": [ "CMakeUserPresets.json" ],
     "configurePresets": [
         {
             "name": "windows-base",
+            "inherits": "user-win",
             "hidden": true,
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/out/build/${presetName}",
-            "installDir": "${sourceDir}/out/install/${presetName}",
-            "cacheVariables": {
-                "CMAKE_C_COMPILER": "cl.exe",
-                "CMAKE_CXX_COMPILER": "cl.exe"
-            },
             "condition": {
                 "type": "equals",
                 "lhs": "${hostSystemName}",
                 "rhs": "Windows"
+            },
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
             }
         },
         {
-            "name": "x64-debug",
-            "displayName": "x64 Debug",
+            "name": "x64-debug-win",
+            "displayName": "x64 Debug Windows",
             "inherits": "windows-base",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_FLAGS_DEBUG": "-fprofile-instr-generate -fcoverage-mapping -g -fno-discard-value-names",
+                "CMAKE_EXE_LINKER_FLAGS_DEBUG": "-fprofile-instr-generate -fcoverage-mapping"
+
+            },
+            "environment": {
+              "QT_QPA_PLATFORM_PLUGIN_PATH": "F:/Tools/vcpkg/packages/qtbase_x64-windows/debug/Qt6/plugins/platforms"
+            }
+        },
+        {
+            "name": "x64-release-win",
+            "displayName": "x64 Release Windows",
+            "inherits": "windows-base",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "x86-debug-win",
+            "displayName": "x86 Debug Windows",
+            "inherits": "windows-base",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_FLAGS_DEBUG": "-fprofile-instr-generate -fcoverage-mapping -g -fno-discard-value-names",
+                "CMAKE_EXE_LINKER_FLAGS_DEBUG": "-fprofile-instr-generate -fcoverage-mapping"
+            }
+        },
+        {
+            "name": "x86-release-win",
+            "displayName": "x86 Release Windows",
+            "inherits": "windows-base",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            },
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "linux-base",
+            "inherits": "user-lin",
+            "hidden": true,
+            "generator": "Ninja",
+            "condition": {
+                "type": "equals",
+                "lhs": "${hostSystemName}",
+                "rhs": "Linux"
+            },
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "x64-debug-lin",
+            "displayName": "x64 Debug Linux",
+            "inherits": "linux-base",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
             "architecture": {
                 "value": "x64",
                 "strategy": "external"
@@ -30,17 +109,25 @@
             }
         },
         {
-            "name": "x64-release",
-            "displayName": "x64 Release",
-            "inherits": "x64-debug",
+            "name": "x64-release-lin",
+            "displayName": "x64 Release Linux",
+            "inherits": "linux-base",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
+            "architecture": {
+                "value": "x64",
+                "strategy": "external"
+            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
             }
         },
         {
-            "name": "x86-debug",
-            "displayName": "x86 Debug",
-            "inherits": "windows-base",
+            "name": "x86-debug-lin",
+            "displayName": "x86 Debug Linux",
+            "inherits": "linux-base",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
             "architecture": {
                 "value": "x86",
                 "strategy": "external"
@@ -50,11 +137,43 @@
             }
         },
         {
-            "name": "x86-release",
-            "displayName": "x86 Release",
-            "inherits": "x86-debug",
+            "name": "x86-release-lin",
+            "displayName": "x86 Release Linux",
+            "inherits": "linux-base",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
+            "architecture": {
+                "value": "x86",
+                "strategy": "external"
+            },
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release"
+            }
+        },
+        {
+            "name": "Configure preset using toolchain file",
+            "displayName": "Configure preset using toolchain file",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/compiled/build/${presetName}",
+            "installDir": "${sourceDir}/compiled/install/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_TOOLCHAIN_FILE": "",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/out/install/${presetName}"
+            }
+        },
+        {
+            "name": "ci",
+            "displayName": "CI Build",
+            "description": "Build configuration for GitHub Actions CI",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "$env{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake",
+                "VCPKG_TARGET_TRIPLET": "x64-windows",
+                "CMAKE_BUILD_TYPE": "Release",
+                "BUILD_TESTS": "ON"
             }
         }
     ]

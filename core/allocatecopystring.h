@@ -1,0 +1,1 @@
+int allocate_and_copy_string(char **dest, const char *src);

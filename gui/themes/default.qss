@@ -1,0 +1,63 @@
+/* ===== GLOBAL STYLES ===== */
+QWidget {
+    font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
+    font-size: 14px;
+}
+
+QMainWindow {
+    border-radius: 12px;
+    padding: 16px;
+    background: qlineargradient(
+        x1: 0, y1: 0,
+        x2: 1, y2: 1,
+        stop: 0 #faf5ff,
+        stop: 0.5 #f5f3ff,
+        stop: 1 #e0e7ff
+    );
+}
+
+#cardFrame {
+    background-color: white;
+    border: 1px solid #f3e8ff;
+    border-radius: 12px;
+    padding: 12px;
+}
+
+QLabel#headerSend,
+QLabel#headerReceive {
+    font-family: "Segoe UI", "Inter", "Roboto", sans-serif;
+    font-size: 28px;
+    font-weight: bold;
+    color: #111111;
+}
+
+QPushButton#settingButton {
+    color: #8b5cf6;
+    background-color: transparent;
+    border: 1px solid #8b5cf6;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-weight: 600;
+    font-family: "Segoe UI", sans-serif;
+}
+
+/* Hover State */
+QPushButton#settingButton:hover {
+    color: #7c3aed;
+    border: 1px solid #7c3aed;
+}
+
+QPushButton#sendButton, QPushButton#receiveButton { /* non selected button */
+    background-color: #f3f0ff;
+    color: #8b5cf6;
+    border: 1px solid #8b5cf6;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: bold;
+}
+
+QPushButton#sendButton:checked, QPushButton#receiveButton:checked { /* Selected button */
+    background-color: #8b5cf6;
+    font-weight: bold;
+    color: white;
+}
