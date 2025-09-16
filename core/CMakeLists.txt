@@ -24,7 +24,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
     /Zc:inline               # Standard inline semantics
     /Zc:preprocessor         # Conformant macro handling
     /utf-8                   # UTF-8 encoding for source files
-    /std:c17                 # Explicitly set C standard
+    /std:c23                 # Explicitly set C standard
     /GS                      # Buffer security checks
     /sdl                     # Enable additional security checks
 
@@ -52,7 +52,7 @@ if (CMAKE_C_COMPILER_ID STREQUAL "Clang" AND NOT MSVC)
     -Wundef
     -O2
     -march=native
-    -std=c17
+    -std=c23
     -fstrict-aliasing
     -fvisibility=hidden
     -fno-omit-frame-pointer

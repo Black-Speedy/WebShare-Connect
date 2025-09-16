@@ -208,8 +208,7 @@ int port_handler(const char *args[]) {
         return ERR_INVALID_PORT;
     }
 
-    // Set the port in the application context (not shown here)
-    PORT = (uint16_t)port; // Assuming DEFAULT_PORT is a global variable
+    PORT = (uint16_t)port;
 
     printf("Port set to %d\n", port);
     return 0;
